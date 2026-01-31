@@ -14,3 +14,6 @@ class ExchangeService:
         exchange_repository: ExchangeRepository = _exchange_repository,
     ) -> None:
         self.exchange_repository = exchange_repository
+
+    def exchange_shares(self, vendor_id: str, investor_id: str) -> None:
+        pass
