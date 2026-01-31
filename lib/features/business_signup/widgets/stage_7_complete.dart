@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:go_router/go_router.dart";
 import "shared/action_button.dart";
 
 class Stage7Complete extends StatelessWidget {
@@ -44,9 +45,7 @@ class Stage7Complete extends StatelessWidget {
         const SizedBox(height: 40),
         ActionButton(
           label: "Go to Dashboard",
-          onPressed: () {
-            // TODO: Navigate to business dashboard
-          },
+          onPressed: () => context.go("/business/dashboard"),
         ),
       ],
     );

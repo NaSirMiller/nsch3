@@ -1,3 +1,4 @@
+import "package:capital_commons/features/business_dashboard/views/business_dashboard_page.dart";
 import "package:capital_commons/features/business_signup/views/business_signup_page.dart";
 import "package:capital_commons/features/investor_signup/views/investor_signup_page.dart";
 import "package:capital_commons/features/landing/views/landing_page.dart";
@@ -27,5 +28,9 @@ final goRouter = GoRouter(
       ],
     ),
     GoRoute(path: "/login", builder: (_, _) => const LoginPage()),
+    GoRoute(
+      path: "/business/dashboard",
+      builder: (_, _) => const BusinessDashboardPage(),
+    ),
   ],
 );
