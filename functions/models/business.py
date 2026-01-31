@@ -16,6 +16,7 @@ class IncomingBusiness(BaseModel):
     sharePrice: Optional[float]
     divdendPercentage: Optional[float]
     isApproved: Optional[bool]
+    ticker: Optional[str]
 
 
 class Business(BaseModel):
@@ -32,3 +33,4 @@ class Business(BaseModel):
     sharePrice: float
     divdendPercentage: Optional[float]
     isApproved: bool
+    ticker: str
