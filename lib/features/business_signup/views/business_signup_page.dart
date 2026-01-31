@@ -1,127 +1,164 @@
-import "package:capital_commons/core/loading_status.dart";
-import "package:capital_commons/features/business_signup/cubit/business_signup_cubit.dart";
-import "package:capital_commons/utils/snackbar_message.dart";
 import "package:flutter/material.dart";
-import "package:flutter_bloc/flutter_bloc.dart";
 import "package:flutter_hooks/flutter_hooks.dart";
+import "package:go_router/go_router.dart";
+import "package:capital_commons/features/business_signup/widgets/stage_progress.dart";
+import "package:capital_commons/features/business_signup/widgets/stage_1_account.dart";
+import "package:capital_commons/features/business_signup/widgets/stage_2_business_info.dart";
+import "package:capital_commons/features/business_signup/widgets/stage_3_financials.dart";
+import "package:capital_commons/features/business_signup/widgets/stage_4_valuation.dart";
+import "package:capital_commons/features/business_signup/widgets/stage_5_shares.dart";
+import "package:capital_commons/features/business_signup/widgets/stage_6_legal.dart";
+import "package:capital_commons/features/business_signup/widgets/stage_7_complete.dart";
+import "package:capital_commons/features/business_signup/widgets/shared/glow_circle.dart";
 
 class BusinessSignupPage extends HookWidget {
   const BusinessSignupPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final formKey = useMemoized(() => GlobalKey<FormState>());
-    final emailController = useTextEditingController();
-    final passwordController = useTextEditingController();
+    final currentStage = useState(0);
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final isDesktop = screenWidth >= 1024;
 
-    final theme = Theme.of(context);
+    final stages = [
+      "Account",
+      "Business Info",
+      "Financials",
+      "Valuation",
+      "Shares",
+      "Legal",
+      "Complete",
+    ];
 
-    return BlocProvider(
-      create: (_) => BusinessSignupCubit(),
-      child: BlocListener<BusinessSignupCubit, BusinessSignupState>(
-        listener: (context, state) {
-          if (state.signupStatus.isFailure) {
-            context.showSnackbarMessage(
-              state.message ?? "An unexpected error occurred",
-            );
-          }
-        },
-        child: Builder(
-          builder: (context) {
-            return Scaffold(
-              backgroundColor: theme.colorScheme.surface,
-              body: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 420),
+    void nextStage() {
+      if (currentStage.value < stages.length - 1) {
+        currentStage.value++;
+      }
+    }
+
+    void previousStage() {
+      if (currentStage.value > 0) {
+        currentStage.value--;
+      }
+    }
+
+    return Scaffold(
+      body: DecoratedBox(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFF0A1628), Color(0xFF1A2E4A), Color(0xFF0D3B66)],
+          ),
+        ),
+        child: Stack(
+          children: [
+            // Background glow
+            Positioned(
+              top: -80,
+              right: -60,
+              child: GlowCircle(
+                size: 250,
+                color: const Color(0xFF4A90D9).withOpacity(0.08),
+              ),
+            ),
+
+            // Back button
+            Positioned(
+              top: 56,
+              left: 20,
+              child: IconButton(
+                onPressed: () {
+                  if (currentStage.value > 0) {
+                    previousStage();
+                  } else {
+                    context.go("/signup");
+                  }
+                },
+                icon: const Icon(
+                  Icons.arrow_back_ios_new_rounded,
+                  color: Colors.white70,
+                  size: 22,
+                ),
+              ),
+            ),
+
+            // Main content
+            Center(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24.0,
+                    vertical: 40,
+                  ),
                   child: Container(
-                    padding: const EdgeInsets.all(32),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.surface,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.06),
-                          blurRadius: 24,
-                          offset: const Offset(0, 8),
+                    constraints: BoxConstraints(
+                      maxWidth: isDesktop ? 800 : 600,
+                    ),
+                    child: Column(
+                      children: [
+                        // Progress indicator
+                        StageProgress(
+                          currentStage: currentStage.value,
+                          stages: stages,
+                        ),
+
+                        const SizedBox(height: 40),
+
+                        // Stage content card
+                        Container(
+                          padding: const EdgeInsets.all(40),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.08),
+                            borderRadius: BorderRadius.circular(24),
+                            border: Border.all(
+                              color: Colors.white.withOpacity(0.15),
+                              width: 1.5,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.3),
+                                blurRadius: 30,
+                                offset: const Offset(0, 10),
+                              ),
+                            ],
+                          ),
+                          child: _buildStageContent(
+                            currentStage.value,
+                            nextStage,
+                          ),
                         ),
                       ],
-                    ),
-                    child: Form(
-                      key: formKey,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Text(
-                            "Create your business account",
-                            style: theme.textTheme.headlineSmall?.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            "Get access to exclusive opportunities",
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: theme.colorScheme.onSurface.withOpacity(
-                                0.6,
-                              ),
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 32),
-                          TextFormField(
-                            controller: emailController,
-                            decoration: const InputDecoration(
-                              labelText: "Email",
-                              border: OutlineInputBorder(),
-                            ),
-                            keyboardType: TextInputType.emailAddress,
-                          ),
-                          const SizedBox(height: 16),
-                          TextFormField(
-                            controller: passwordController,
-                            decoration: const InputDecoration(
-                              labelText: "Password",
-                              border: OutlineInputBorder(),
-                            ),
-                            obscureText: true,
-                          ),
-                          const SizedBox(height: 24),
-                          SizedBox(
-                            height: 48,
-                            child: ElevatedButton(
-                              onPressed: () {
-                                context
-                                    .read<BusinessSignupCubit>()
-                                    .submitSignupForm(
-                                      email: emailController.text.trim(),
-                                      password: passwordController.text,
-                                    );
-                              },
-                              child: const Text("Create account"),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            "By signing up, you agree to our Terms & Privacy Policy",
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurface.withOpacity(
-                                0.5,
-                              ),
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
                     ),
                   ),
                 ),
               ),
-            );
-          },
+            ),
+          ],
         ),
       ),
     );
+  }
+
+  Widget _buildStageContent(int stage, VoidCallback onNext) {
+    switch (stage) {
+      case 0:
+        return Stage1Account(onNext: onNext);
+      case 1:
+        return Stage2BusinessInfo(onNext: onNext);
+      case 2:
+        return Stage3Financials(onNext: onNext);
+      case 3:
+        return Stage4Valuation(onNext: onNext);
+      case 4:
+        return Stage5Shares(onNext: onNext);
+      case 5:
+        return Stage6Legal(onNext: onNext);
+      case 6:
+        return const Stage7Complete();
+      default:
+        return const SizedBox();
+    }
   }
 }
