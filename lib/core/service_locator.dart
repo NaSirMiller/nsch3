@@ -1,5 +1,6 @@
 import "package:capital_commons/clients/auth_client.dart";
 import "package:capital_commons/core/logger.dart";
+import "package:capital_commons/features/user/user_cubit.dart";
 import "package:capital_commons/firebase_options.dart";
 import "package:capital_commons/repositories/business_repository.dart";
 import "package:cloud_firestore/cloud_firestore.dart";
@@ -24,6 +25,12 @@ Future<void> configureDependencies() async {
     }
   }
 
+  // Register clients
   getIt.registerLazySingleton(() => AuthClient());
+
+  // Register repositories
   getIt.registerLazySingleton(() => BusinessRepository());
+
+  // Register UserCubit as singleton
+  getIt.registerLazySingleton(() => UserCubit());
 }

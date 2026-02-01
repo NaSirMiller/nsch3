@@ -11,11 +11,28 @@ import "package:capital_commons/features/market/views/market_page.dart";
 import "package:capital_commons/features/market/views/business_detail_page.dart";
 import "package:capital_commons/features/market/views/secondary_market_page.dart";
 import "package:capital_commons/features/market/views/secondary_listing_detail_page.dart";
+import "package:capital_commons/features/user/user_cubit.dart";
+import "package:capital_commons/core/service_locator.dart";
+import "dart:async";
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 
 final goRouter = GoRouter(
   navigatorKey: rootNavigatorKey,
+  refreshListenable: GoRouterRefreshStream(getIt<UserCubit>().stream),
+  redirect: (context, state) {
+    final userCubit = getIt<UserCubit>();
+    final currentUser = userCubit.state.currentUser;
+    final isOnLanding = state.matchedLocation == '/';
+
+    // If user is logged in and on landing page, redirect to market
+    if (currentUser != null && isOnLanding) {
+      return '/market';
+    }
+
+    // No redirect needed
+    return null;
+  },
   routes: [
     /// Landing
     GoRoute(path: "/", builder: (_, _) => const LandingPage()),
@@ -68,3 +85,21 @@ final goRouter = GoRouter(
     ),
   ],
 );
+
+// Helper class to make GoRouter refresh when UserCubit state changes
+class GoRouterRefreshStream extends ChangeNotifier {
+  GoRouterRefreshStream(Stream<dynamic> stream) {
+    notifyListeners();
+    _subscription = stream.asBroadcastStream().listen(
+      (dynamic _) => notifyListeners(),
+    );
+  }
+
+  late final StreamSubscription<dynamic> _subscription;
+
+  @override
+  void dispose() {
+    _subscription.cancel();
+    super.dispose();
+  }
+}
