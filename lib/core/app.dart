@@ -11,7 +11,10 @@ class CapitalCommonsApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider.value(
       value: getIt<UserCubit>(),
-      child: MaterialApp.router(routerConfig: goRouter),
+      child: MaterialApp.router(
+        routerConfig: goRouter,
+        title: "Capital Exchange",
+      ),
     );
   }
 }
