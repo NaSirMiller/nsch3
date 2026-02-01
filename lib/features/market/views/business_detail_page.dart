@@ -1,5 +1,7 @@
 import "package:capital_commons/core/loading_status.dart";
+import "package:capital_commons/core/service_locator.dart";
 import "package:capital_commons/features/market/cubit/business_details_cubit.dart";
+import "package:capital_commons/features/user/user_cubit.dart";
 import "package:capital_commons/utils/snackbar_message.dart";
 import "package:flutter/material.dart";
 import "package:flutter_bloc/flutter_bloc.dart";
@@ -22,49 +24,73 @@ class BusinessDetailPage extends HookWidget {
     final isDesktop = screenWidth >= 1024;
     final isTablet = screenWidth >= 768 && screenWidth < 1024;
 
-    // Mock business data (would come from API)
-    final business = {
-      "id": businessId,
-      "name": "Capital Coffee Co.",
-      "category": "Food & Beverage",
-      "location": "123 River Street, Troy, NY 12180",
-      "logo": Icons.local_cafe,
-      "price": 125.0,
-      "raised": 87500.0,
-      "goal": 100000.0,
-      "investors": 24,
-      "dividend": 5.0,
-      "verified": true,
-      "founded": "2020",
-      "description":
-          "Capital Coffee Co. is an artisan coffee roastery dedicated to sourcing and roasting the finest beans from around the world. We serve the Capital Region with premium coffee and espresso drinks, while supporting local community initiatives and sustainable farming practices.",
-      "revenue": 250000.0,
-      "expenses": 180000.0,
-      "netProfit": 70000.0,
-      "sharesAvailable": 125,
-      "totalShares": 1000,
-    };
-
     return BlocProvider(
       create: (_) => BusinessDetailsCubit()..loadBusiness(businessId),
       child: BlocConsumer<BusinessDetailsCubit, BusinessDetailsState>(
         listener: (context, state) {
-          if (state.message != null) {
+          // Handle purchase status
+          if (state.purchaseStatus.isSuccess) {
+            context.showSnackbarMessage(
+              state.message ?? "Successfully purchased shares!",
+            );
+            context.read<BusinessDetailsCubit>().resetPurchaseStatus();
+          } else if (state.purchaseStatus.isFailure) {
+            context.showSnackbarMessage(
+              state.message ?? "Failed to purchase shares",
+            );
+            context.read<BusinessDetailsCubit>().resetPurchaseStatus();
+          }
+
+          // Handle load business failure
+          if (state.loadBusinessStatus.isFailure && state.message != null) {
             context.showSnackbarMessage(state.message!);
           }
         },
         builder: (context, state) {
           if (state.loadBusinessStatus.isLoading) {
             return Scaffold(
-              appBar: AppBar(),
-              body: const Center(child: CircularProgressIndicator.adaptive()),
+              appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0),
+              body: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: const [
+                      Color(0xFF0A1628),
+                      Color(0xFF1A2E4A),
+                      Color(0xFF0D3B66),
+                    ],
+                  ),
+                ),
+                child: const Center(
+                  child: CircularProgressIndicator(color: Color(0xFF4A90D9)),
+                ),
+              ),
             );
           }
 
           if (state.loadBusinessStatus.isFailure || state.business == null) {
             return Scaffold(
-              appBar: AppBar(),
-              body: const Center(child: Text("Couldn't load business details")),
+              appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0),
+              body: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: const [
+                      Color(0xFF0A1628),
+                      Color(0xFF1A2E4A),
+                      Color(0xFF0D3B66),
+                    ],
+                  ),
+                ),
+                child: const Center(
+                  child: Text(
+                    "Couldn't load business details",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ),
             );
           }
 
@@ -174,6 +200,9 @@ class BusinessDetailPage extends HookWidget {
                                     sharesAvailable: 0, // TODO
                                     dividend:
                                         state.business!.dividendPercentage,
+                                    businessId: businessId,
+                                    isPurchasing:
+                                        state.purchaseStatus.isLoading,
                                   ),
                                 ),
                               ],
@@ -184,6 +213,8 @@ class BusinessDetailPage extends HookWidget {
                               price: state.business!.sharePrice,
                               sharesAvailable: 0, // TODO
                               dividend: state.business!.dividendPercentage,
+                              businessId: businessId,
+                              isPurchasing: state.purchaseStatus.isLoading,
                             ),
                             const SizedBox(height: 24),
                             const BusinessAbout(

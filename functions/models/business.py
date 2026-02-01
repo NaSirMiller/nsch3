@@ -1,26 +1,29 @@
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class Business(BaseModel):
-    id: str
+    uid: str  # Changed from 'id'
+    name: str  # Added - was missing
     description: str
     industry: str
     logoFilepath: str
     plDocFilepath: str
     projectedRevenue: float
     projectedExpenses: float
-    # projectedProfit -> projectedRevenue - projectedExpenses
+    projectedProfit: float  # Added - was missing
     valuation: float
-    totalSharesIssues: int
-    sharesAvailable: int
+    totalSharesIssued: int  # Fixed typo from 'totalSharesIssues'
     sharePrice: float
-    divdendPercentage: Optional[float]
+    dividendPercentage: float  # Fixed typo from 'divdendPercentage'
     isApproved: bool
-    ticker: str
     address: str
-    year_founded: str
-    goal: int  # prices per shares * sharesAllowed
+    goal: float  # Changed to float to match Dart
     numInvestors: int
     amountRaised: int
+    yearFounded: str  # Fixed from 'year_founded'
+
+    # These might be in Firestore but not in Dart model - keep optional
+    sharesAvailable: int
+    ticker: str

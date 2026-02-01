@@ -21,6 +21,12 @@ dependencies:
   go_router: ^17.0.1
   json_annotation: ^4.10.0
   logger: ^2.6.2
+  cloud_functions: ^6.0.6
+  file_picker: ^10.3.10
+  firebase_storage: ^13.0.6
+  uuid: ^4.5.2
+  path: ^1.9.1
+  web: ^1.1.1
 
 dev_dependencies:
   flutter_test:
@@ -32,3 +38,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/images/capital_region_1.jpg
+    - assets/images/capital_region_2.jpg
+    - assets/images/capital_region_3.jpg
+    - assets/images/capital_region_4.jpg

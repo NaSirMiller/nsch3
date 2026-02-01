@@ -1,8 +1,7 @@
-from firebase_admin.exceptions import FirebaseError
-from firebase_admin.firestore import firestore
-
 from core import singletons
 from core.logger import logger
+from firebase_admin.exceptions import FirebaseError
+from firebase_admin.firestore import firestore
 from models.holding import Holding
 
 
@@ -21,7 +20,6 @@ class PortfolioRepository:
         ticker: str,
         num_shares: int,
         share_price: float,
-        transaction: firestore.Transaction,
     ) -> None:
         holding_ref = (
             self._firestore_client.collection(self.portfolios_collection_name)
@@ -31,21 +29,19 @@ class PortfolioRepository:
         )
 
         try:
-            snapshot = holding_ref.get(transaction=transaction)
+            snapshot = holding_ref.get()  # no transaction
 
             if snapshot.exists:
-                transaction.update(
-                    holding_ref,
-                    {"numShares": firestore.Increment(num_shares)},
-                )
+                # Atomic increment outside transaction
+                holding_ref.update({"numShares": firestore.Increment(num_shares)})
             else:
-                transaction.set(
-                    holding_ref,
+                # Create the holding if it doesn't exist
+                holding_ref.set(
                     Holding(
                         ticker=ticker,
                         sharePrice=share_price,
                         numShares=num_shares,
-                    ).model_dump(),
+                    ).model_dump()
                 )
 
         except FirebaseError as e:

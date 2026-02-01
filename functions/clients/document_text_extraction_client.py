@@ -1,8 +1,12 @@
-from typing import Optional
 import json
+import re
+import tempfile
+from typing import Any, Optional
 
-from openrouter import OpenRouter
 import pymupdf
+from core.logger import logger
+from firebase_admin import storage
+from openrouter import OpenRouter
 
 
 class OpenRouterError(Exception):
@@ -145,60 +149,119 @@ Correct output:
 """.strip()
 
 
+def extract_json_from_llm_response(resp: str) -> dict:
+    """
+    Extracts JSON object from LLM response, stripping Markdown backticks if present.
+    Converts numeric strings with commas or $ to numbers.
+    """
+    # Remove ```json or ``` blocks
+    resp = re.sub(r"^```json\s*|\s*```$", "", resp.strip(), flags=re.MULTILINE)
+
+    # Extract the first {...} block
+    match = re.search(r"\{.*\}", resp, re.DOTALL)
+    if not match:
+        raise ValueError("No JSON object found in LLM response")
+
+    json_str = match.group(0)
+
+    # Remove trailing commas
+    json_str = re.sub(r",\s*}", "}", json_str)
+    json_str = re.sub(r",\s*\]", "]", json_str)
+
+    # Parse JSON
+    data = json.loads(json_str)
+
+    # Convert numbers if strings
+    for key in ["total_revenue", "total_expenses"]:
+        if key in data:
+            if isinstance(data[key], str):
+                data[key] = float(data[key].replace(",", "").replace("$", ""))
+            else:
+                data[key] = float(data[key])  # in case it's like 807.1
+    return data
+
+
 class DocumentTextExtractionClient:
     def __init__(self, open_router_client: OpenRouterClient) -> None:
         self.open_router_client = open_router_client
 
     def _extract_text_from_pdf(self, pdf_path: str) -> list[str]:
-        if pdf_path.split(".")[-1] != "pdf":
-            raise ValueError(f"{pdf_path} is not a pdf")
+        logger.info(f"Starting PDF text extraction from: {pdf_path}")
 
-        pdf_text: list[str] = []
-        try:
-            with pymupdf.open(pdf_path) as pdf_file:
-                for page in pdf_file:
-                    pdf_content = page.get_text()
-                    if pdf_content:
-                        pdf_text.append(pdf_content)
-        except Exception as e:
-            raise PDFExtractionError(
-                f"Could not extract text from pdf located at {pdf_path}: {e}"
-            )
+        # Create a temporary file
+        with tempfile.NamedTemporaryFile(suffix=".pdf") as temp_file:
+            try:
+                bucket = storage.bucket()
+                blob = bucket.blob(pdf_path)  # pdf_path is like "business/.../file.pdf"
+                blob.download_to_filename(temp_file.name)
+                logger.info(f"Downloaded PDF to temporary file: {temp_file.name}")
+            except Exception as e:
+                logger.error(f"Failed to download PDF from Firebase Storage: {e}")
+                raise PDFExtractionError(f"Could not download PDF: {e}")
+
+            # Now open the temp file with pymupdf
+            pdf_text: list[str] = []
+            try:
+                import fitz  # pymupdf
+
+                with fitz.open(temp_file.name) as pdf_file:
+                    for i, page in enumerate(pdf_file):
+                        page_text = page.get_text()
+                        if page_text:
+                            pdf_text.append(page_text)
+                            logger.debug(
+                                f"Extracted text from page {i + 1}: {len(page_text)} characters"
+                            )
+            except Exception as e:
+                logger.error(f"Failed to extract text from PDF {pdf_path}: {e}")
+                raise PDFExtractionError(f"Could not extract text from pdf: {e}")
+
+        logger.info(
+            f"Completed PDF text extraction from: {pdf_path}, total pages: {len(pdf_text)}"
+        )
         return pdf_text
 
-    def get_statement_details(self, pl_statement_path: str) -> dict:
-        pdf_text_per_page: list[str]
+    def get_statement_details(self, pl_statement_path: str) -> dict[str, Any]:
+        logger.info(f"Starting P&L statement extraction for: {pl_statement_path}")
         try:
             pdf_text_per_page = self._extract_text_from_pdf(pl_statement_path)
         except (ValueError, PDFExtractionError) as e:
+            logger.error(f"Error extracting text from PDF: {e}")
             raise DocumentExtractionsError(
                 "Could not extract text from PL statement document."
             )
+
         pl_statement = "\n".join(pdf_text_per_page)
-        print(
-            f"================ PL STATEMENT =============================\n{pl_statement}"
-        )
-        llm_response: str
+        logger.debug(f"P&L statement text:\n{pl_statement}")
 
         try:
             llm_response = self.open_router_client.get_response(
                 f"Extract the total annual revenue and expenditures from the following profit-loss statement: {pl_statement}",
                 SYSTEM_PROMPT,
             )
-            print(f"============ LLM RESPONSE =============\n{llm_response}")
-        except OpenRouterError:
+            logger.debug(f"LLM raw response: {llm_response}")
+        except OpenRouterError as e:
+            logger.error(f"LLM extraction error: {e}")
             raise DocumentExtractionsError(
-                "An error occurred while exracting the expenditure and revenue of the PL statement"
+                "An error occurred while extracting the expenditure and revenue of the PL statement"
             )
 
         try:
-            parsed_response = json.loads(llm_response)
+            parsed_response = extract_json_from_llm_response(llm_response)
             if "total_revenue" not in parsed_response:
+                logger.error("total_revenue missing from LLM response")
                 raise ValueError("total_revenue missing from response")
             if "total_expenses" not in parsed_response:
-                raise ValueError("total_expenditures missing from response")
+                logger.error("total_expenses missing from LLM response")
+                raise ValueError("total_expenses missing from response")
         except Exception as e:
+            logger.error(f"Failed to parse LLM response: {e}")
             raise DocumentExtractionsError("Response was not in expected form")
+
+        logger.info(
+            f"Successfully extracted P&L details: total_revenue={parsed_response['total_revenue']}, "
+            f"total_expenses={parsed_response['total_expenses']}"
+        )
 
         return {
             "total_revenue": parsed_response["total_revenue"],
@@ -207,7 +270,8 @@ class DocumentTextExtractionClient:
 
 
 router_client: OpenRouterClient = OpenRouterClient(
-    model_name="deepseek/deepseek-chat-v3.1", api_key=""
+    model_name="deepseek/deepseek-chat-v3.1",
+    api_key="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",
 )
 doc_client: DocumentTextExtractionClient = DocumentTextExtractionClient(
     open_router_client=router_client
