@@ -6,7 +6,7 @@ import "package:capital_commons/features/investor_dashboard/widgets/stats_overvi
 import "package:capital_commons/features/investor_dashboard/widgets/holdings_list.dart";
 import "package:capital_commons/features/investor_dashboard/widgets/transactions_list.dart";
 import "package:capital_commons/features/investor_dashboard/widgets/available_businesses_list.dart";
-import "package:capital_commons/features/investor_dashboard/widgets/quick_actions.dart"; // Added import
+import "package:capital_commons/features/investor_dashboard/widgets/quick_actions.dart";
 import "package:capital_commons/models/business.dart";
 
 // Temporary mock businesses
@@ -61,7 +61,6 @@ final mockBusinesses = [
   ),
 ];
 
-
 class InvestorDashboardPage extends HookWidget {
   const InvestorDashboardPage({super.key});
 
@@ -87,11 +86,12 @@ class InvestorDashboardPage extends HookWidget {
         child: SafeArea(
           child: CustomScrollView(
             slivers: [
-              // App bar
+              /// App bar
               SliverAppBar(
                 floating: true,
                 backgroundColor: Colors.transparent,
                 elevation: 0,
+                iconTheme: const IconThemeData(color: Colors.white), // ✅ CC-39
                 title: const Text(
                   "Investor Dashboard",
                   style: TextStyle(
@@ -115,7 +115,7 @@ class InvestorDashboardPage extends HookWidget {
                 ],
               ),
 
-              // Content
+              /// Content
               SliverPadding(
                 padding: EdgeInsets.symmetric(
                   horizontal: isDesktop ? 40 : (isTablet ? 24 : 16),
@@ -123,15 +123,12 @@ class InvestorDashboardPage extends HookWidget {
                 ),
                 sliver: SliverList(
                   delegate: SliverChildListDelegate([
-                    // Header
                     const DashboardHeader(),
                     const SizedBox(height: 24),
 
-                    // Portfolio metrics
                     const StatsOverview(),
                     const SizedBox(height: 24),
 
-                    // Desktop layout
                     if (isDesktop)
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -140,12 +137,11 @@ class InvestorDashboardPage extends HookWidget {
                             flex: 2,
                             child: Column(
                               children: [
-                                // My Holdings first
                                 const HoldingsList(),
                                 const SizedBox(height: 24),
-
-                                // Available businesses
-                                AvailableBusinessesList(businesses: mockBusinesses),
+                                AvailableBusinessesList(
+                                  businesses: mockBusinesses, // ✅ CC-39
+                                ),
                               ],
                             ),
                           ),
@@ -153,11 +149,8 @@ class InvestorDashboardPage extends HookWidget {
                           Expanded(
                             child: Column(
                               children: [
-                                // Transactions
                                 const TransactionsList(),
                                 const SizedBox(height: 24),
-
-                                // Quick Actions added back
                                 const QuickActions(),
                               ],
                             ),
@@ -165,7 +158,6 @@ class InvestorDashboardPage extends HookWidget {
                         ],
                       )
                     else ...[
-                      // Mobile / tablet stacked layout
                       const HoldingsList(),
                       const SizedBox(height: 24),
                       AvailableBusinessesList(businesses: mockBusinesses),

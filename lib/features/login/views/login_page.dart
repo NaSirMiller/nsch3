@@ -25,8 +25,24 @@ class _LoginPageState extends State<LoginPage> {
     setState(() => _isLoading = true);
 
     // TODO: wire up Firebase Auth here
+    // After authentication, get the user's role and route accordingly
     Future.delayed(const Duration(milliseconds: 1500), () {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+
+        // TODO: Get actual user role from Firebase Auth
+        // For now, mock it based on email (remove this in production)
+        final String userRole = _emailController.text.contains('business')
+            ? 'business'
+            : 'investor';
+
+        // Route based on user role
+        if (userRole == 'investor') {
+          context.go('/market');
+        } else if (userRole == 'business') {
+          context.go('/business/dashboard');
+        }
+      }
     });
   }
 
