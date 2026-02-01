@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
 import "package:flutter_hooks/flutter_hooks.dart";
-
+import "package:go_router/go_router.dart";
 import "package:capital_commons/features/investor_dashboard/widgets/dashboard_header.dart";
 import "package:capital_commons/features/investor_dashboard/widgets/stats_overview.dart";
 import "package:capital_commons/features/investor_dashboard/widgets/holdings_list.dart";
@@ -94,6 +94,8 @@ class InvestorDashboardPage extends HookWidget {
                     color: Colors.white,
                   ),
                 ),
+
+                /// Inside SliverAppBar actions:
                 actions: [
                   IconButton(
                     onPressed: () {},
@@ -101,7 +103,10 @@ class InvestorDashboardPage extends HookWidget {
                     color: Colors.white70,
                   ),
                   IconButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      // Navigate to the Settings page
+                      context.go('/settings');
+                    },
                     icon: const Icon(Icons.settings_outlined),
                     color: Colors.white70,
                   ),

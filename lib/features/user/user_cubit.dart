@@ -20,6 +20,12 @@ class UserCubit extends Cubit<UserState> {
     emit(state.copyWith(currentUser: user));
   }
 
+  /// New logout method
+  Future<void> logout() async {
+    await _authClient.logout(); // Call AuthClient logout
+    emit(const UserState(currentUser: null)); // Clear local user state
+  }
+
   @override
   Future<void> close() async {
     await _userChangesSubscription?.cancel();

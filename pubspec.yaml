@@ -38,3 +38,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/images/capital_region_1.jpg
+    - assets/images/capital_region_2.jpg
+    - assets/images/capital_region_3.jpg
+    - assets/images/capital_region_4.jpg

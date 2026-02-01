@@ -59,4 +59,15 @@ class AuthClient {
   }
 
   User? get currentUser => _auth.currentUser;
+
+  // Add logout
+  Future<void> logout() async {
+    try {
+      await _auth.signOut();
+      Log.debug("User signed out successfully");
+    } on FirebaseAuthException catch (e) {
+      Log.error("Logout error: $e");
+      throw AuthClientException(e.message ?? "Failed to logout");
+    }
+  }
 }

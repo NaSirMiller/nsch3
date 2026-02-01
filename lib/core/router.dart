@@ -12,6 +12,7 @@ import "package:capital_commons/features/business_dashboard/views/issue_shares_p
 import "package:capital_commons/features/market/views/business_detail_page.dart";
 import "package:capital_commons/features/market/views/secondary_market_page.dart";
 import "package:capital_commons/features/market/views/secondary_listing_detail_page.dart";
+import "package:capital_commons/features/settings/views/settings_page.dart"; // ✅ import settings page
 import "package:capital_commons/features/user/user_cubit.dart";
 import "package:capital_commons/core/service_locator.dart";
 import "dart:async";
@@ -72,6 +73,12 @@ final goRouter = GoRouter(
     GoRoute(
       path: "/investor/dashboard",
       builder: (_, _) => const InvestorDashboardPage(),
+    ),
+
+    /// Settings
+    GoRoute(
+      path: "/settings",
+      builder: (_, __) => const SettingsPage(), // ✅ add settings page
     ),
 
     /// Market - Order matters! Specific routes before parameterized routes

@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import "package:flutter_hooks/flutter_hooks.dart";
+import "package:go_router/go_router.dart";
 import "package:capital_commons/features/business_dashboard/widgets/dashboard_header.dart";
 import "package:capital_commons/features/business_dashboard/widgets/stats_overview.dart";
 import "package:capital_commons/features/business_dashboard/widgets/funding_progress.dart";
@@ -49,7 +50,10 @@ class BusinessDashboardPage extends HookWidget {
                     color: Colors.white70,
                   ),
                   IconButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      // Navigate to the settings page
+                      context.go("/settings?from=business");
+                    },
                     icon: const Icon(Icons.settings_outlined),
                     color: Colors.white70,
                   ),
