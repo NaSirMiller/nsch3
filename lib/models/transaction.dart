@@ -1,14 +1,25 @@
-class TransactionModel {
+import "package:cloud_firestore/cloud_firestore.dart";
 
+class TransactionModel {
   factory TransactionModel.fromJson(Map<String, dynamic> json) {
+    // Handle timestamp conversion from Firestore
+    DateTime timestamp;
+    if (json["timestamp"] is Timestamp) {
+      timestamp = (json["timestamp"] as Timestamp).toDate();
+    } else if (json["timestamp"] is String) {
+      timestamp = DateTime.parse(json["timestamp"]);
+    } else {
+      timestamp = DateTime.now();
+    }
+
     return TransactionModel(
-      uid: json["uid"],
-      fromUser: json["fromUser"],
-      toUser: json["toUser"],
-      numShares: json["numShares"],
-      isProcessed: json["isProcessed"],
-      timestamp: DateTime.parse(json["timestamp"]),
-      pricePerShare: (json["pricePerShare"] as num).toDouble(),
+      uid: json["uid"] ?? "",
+      fromUser: json["fromUser"] ?? "",
+      toUser: json["toUser"] ?? "",
+      numShares: json["numShares"] ?? 0,
+      isProcessed: json["isProcessed"] ?? false,
+      timestamp: timestamp,
+      pricePerShare: (json["pricePerShare"] as num?)?.toDouble() ?? 0.0,
     );
   }
 
@@ -21,6 +32,7 @@ class TransactionModel {
     required this.timestamp,
     required this.pricePerShare,
   });
+
   final String uid;
   final String fromUser;
   final String toUser;
@@ -36,7 +48,7 @@ class TransactionModel {
       "toUser": toUser,
       "numShares": numShares,
       "isProcessed": isProcessed,
-      "timestamp": timestamp.toIso8601String(),
+      "timestamp": Timestamp.fromDate(timestamp),
       "pricePerShare": pricePerShare,
     };
   }

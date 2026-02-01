@@ -1,4 +1,5 @@
 import "package:capital_commons/features/investor_dashboard/cubit/investor_dashboard_cubit.dart";
+import "package:capital_commons/core/loading_status.dart";
 import "package:flutter/material.dart";
 import "package:flutter_bloc/flutter_bloc.dart";
 import "package:flutter_hooks/flutter_hooks.dart";
@@ -9,57 +10,6 @@ import "package:capital_commons/features/investor_dashboard/widgets/holdings_lis
 import "package:capital_commons/features/investor_dashboard/widgets/transactions_list.dart";
 import "package:capital_commons/features/investor_dashboard/widgets/available_businesses_list.dart";
 import "package:capital_commons/features/investor_dashboard/widgets/quick_actions.dart";
-import "package:capital_commons/models/business.dart";
-
-// Temporary mock businesses
-final mockBusinesses = [
-  {
-    "uid": "biz_001",
-    "name": "Green Valley Farms",
-    "description": "Organic produce and local goods",
-    "industry": "Agriculture",
-    "logoFilepath": "", // Changed from null to empty string
-    "plDocFilepath": "", // Changed from null to empty string
-    "projectedRevenue": 450000.0,
-    "projectedExpenses": 280000.0,
-    "projectedProfit": 170000.0,
-    "valuation": 1200000.0,
-    "totalSharesIssued": 100000,
-    "sharePrice": 12.0,
-    "dividendPercentage": 5.0,
-    "isApproved": true,
-    "address": "123 Farm Lane, Albany, NY",
-    "goal": 250000.0,
-    "numInvestors": 48,
-    "amountRaised": 185000.0, // Added .0 to ensure it's a double
-    "yearFounded": "2018",
-  },
-  {
-    "uid": "biz_002",
-    "name": "Hudson Tech Co",
-    "description": "IoT solutions for smart buildings",
-    "industry": "Technology",
-    "logoFilepath": "logos/hudson.png",
-    "plDocFilepath": "docs/hudson_pl.pdf",
-    "projectedRevenue": 950000.0,
-    "projectedExpenses": 640000.0,
-    "projectedProfit": 310000.0,
-    "valuation": 2400000.0,
-    "totalSharesIssued": 200000,
-    "sharePrice": 15.0,
-    "dividendPercentage": 3.5,
-    "isApproved": false,
-    "address": "77 River St, Troy, NY",
-    "goal": 500000.0,
-    "numInvestors": 102,
-    "amountRaised": 320000.0, // Added .0 to ensure it's a double
-    "yearFounded": "2021",
-  },
-];
-
-final List<Business> businesses = mockBusinesses
-    .map((e) => Business.fromJson(e as Map<String, dynamic>))
-    .toList();
 
 class InvestorDashboardPage extends HookWidget {
   const InvestorDashboardPage({super.key});
@@ -71,9 +21,13 @@ class InvestorDashboardPage extends HookWidget {
     final isTablet = screenWidth >= 768 && screenWidth < 1024;
 
     return BlocProvider(
-      create: (_) => InvestorDashboardCubit()..loadHoldings(),
+      create: (_) => InvestorDashboardCubit()..loadDashboardData(),
       child: BlocBuilder<InvestorDashboardCubit, InvestorDashboardState>(
         builder: (context, state) {
+          final isLoading =
+              state.loadHoldingsStatus.isLoading ||
+              state.loadTransactionsStatus.isLoading;
+
           return Scaffold(
             body: DecoratedBox(
               decoration: const BoxDecoration(
@@ -104,8 +58,6 @@ class InvestorDashboardPage extends HookWidget {
                           color: Colors.white,
                         ),
                       ),
-
-                      /// Inside SliverAppBar actions:
                       actions: [
                         IconButton(
                           onPressed: () {},
@@ -113,10 +65,7 @@ class InvestorDashboardPage extends HookWidget {
                           color: Colors.white70,
                         ),
                         IconButton(
-                          onPressed: () {
-                            // Navigate to the Settings page
-                            context.go('/settings');
-                          },
+                          onPressed: () => context.go('/settings'),
                           icon: const Icon(Icons.settings_outlined),
                           color: Colors.white70,
                         ),
@@ -135,7 +84,12 @@ class InvestorDashboardPage extends HookWidget {
                           const DashboardHeader(),
                           const SizedBox(height: 24),
 
-                          const StatsOverview(),
+                          // Stats Overview with real data
+                          StatsOverview(
+                            totalShares: state.totalSharesOwned,
+                            portfolioValue: state.totalPortfolioValue,
+                            isLoading: isLoading,
+                          ),
                           const SizedBox(height: 24),
 
                           if (isDesktop)
@@ -146,32 +100,45 @@ class InvestorDashboardPage extends HookWidget {
                                   flex: 2,
                                   child: Column(
                                     children: [
-                                      const HoldingsList(),
-                                      const SizedBox(height: 24),
-                                      AvailableBusinessesList(
-                                        businesses: businesses,
+                                      HoldingsList(
+                                        holdings: state.holdings,
+                                        isLoading:
+                                            state.loadHoldingsStatus.isLoading,
                                       ),
+                                      const SizedBox(height: 24),
+                                      const AvailableBusinessesList(),
                                     ],
                                   ),
                                 ),
                                 const SizedBox(width: 24),
-                                const Expanded(
+                                Expanded(
                                   child: Column(
                                     children: [
-                                      TransactionsList(),
-                                      SizedBox(height: 24),
-                                      QuickActions(),
+                                      TransactionsList(
+                                        transactions: state.recentTransactions,
+                                        isLoading: state
+                                            .loadTransactionsStatus
+                                            .isLoading,
+                                      ),
+                                      const SizedBox(height: 24),
+                                      const QuickActions(),
                                     ],
                                   ),
                                 ),
                               ],
                             )
                           else ...[
-                            const HoldingsList(),
+                            HoldingsList(
+                              holdings: state.holdings,
+                              isLoading: state.loadHoldingsStatus.isLoading,
+                            ),
                             const SizedBox(height: 24),
-                            AvailableBusinessesList(businesses: businesses),
+                            const AvailableBusinessesList(),
                             const SizedBox(height: 24),
-                            const TransactionsList(),
+                            TransactionsList(
+                              transactions: state.recentTransactions,
+                              isLoading: state.loadTransactionsStatus.isLoading,
+                            ),
                             const SizedBox(height: 24),
                             const QuickActions(),
                           ],

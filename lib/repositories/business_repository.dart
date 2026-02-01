@@ -7,6 +7,7 @@ class BusinessRepositoryException implements Exception {
   const BusinessRepositoryException([
     this.message = "An unexpected error occurred",
   ]);
+
   final String message;
 }
 
@@ -54,8 +55,8 @@ class BusinessRepository {
 
   Future<List<Business>> getAllBusinesses() async {
     Log.trace("Getting all businesses");
-
     late final QuerySnapshot<Map<String, dynamic>> results;
+
     try {
       results = await _firestore.collection(_businessesCollectionName).get();
     } on FirebaseException catch (e) {
@@ -73,7 +74,86 @@ class BusinessRepository {
     }
 
     Log.debug("Loaded ${businesses.length} businesses");
+    return businesses;
+  }
 
+  /// Get approved businesses (available for investment)
+  Future<List<Business>> getApprovedBusinesses({int limit = 10}) async {
+    Log.trace("Getting approved businesses with limit $limit");
+    late final QuerySnapshot<Map<String, dynamic>> results;
+
+    try {
+      results = await _firestore
+          .collection(_businessesCollectionName)
+          .where("isApproved", isEqualTo: true)
+          .orderBy("createdAt", descending: true)
+          .limit(limit)
+          .get();
+    } on FirebaseException catch (e) {
+      Log.error(
+        "FirebaseException occurred while getting approved businesses: $e",
+      );
+      throw const BusinessRepositoryException("A FirebaseException occurred");
+    }
+
+    final businesses = <Business>[];
+    for (final doc in results.docs) {
+      try {
+        final data = doc.data();
+        // Add the document ID if not present
+        if (!data.containsKey('uid')) {
+          data['uid'] = doc.id;
+        }
+        businesses.add(Business.fromJson(data));
+      } on TypeError catch (e) {
+        Log.warning("TypeError while converting doc to business: $e");
+      } catch (e) {
+        Log.warning("Error while converting doc to business: $e");
+      }
+    }
+
+    Log.debug("Loaded ${businesses.length} approved businesses");
+    return businesses;
+  }
+
+  /// Get businesses with available shares
+  Future<List<Business>> getBusinessesWithAvailableShares({
+    int limit = 10,
+  }) async {
+    Log.trace("Getting businesses with available shares, limit $limit");
+    late final QuerySnapshot<Map<String, dynamic>> results;
+
+    try {
+      results = await _firestore
+          .collection(_businessesCollectionName)
+          .where("isApproved", isEqualTo: true)
+          .where("sharesAvailable", isGreaterThan: 0)
+          .orderBy("sharesAvailable", descending: true)
+          .limit(limit)
+          .get();
+    } on FirebaseException catch (e) {
+      Log.error(
+        "FirebaseException occurred while getting businesses with available shares: $e",
+      );
+      throw const BusinessRepositoryException("A FirebaseException occurred");
+    }
+
+    final businesses = <Business>[];
+    for (final doc in results.docs) {
+      try {
+        final data = doc.data();
+        if (!data.containsKey('uid')) {
+          data['uid'] = doc.id;
+        }
+        businesses.add(Business.fromJson(data));
+      } on TypeError catch (e) {
+        Log.warning("TypeError while converting doc to business: $e");
+      } catch (e) {
+        Log.warning("Error while converting doc to business: $e");
+      }
+    }
+
+    Log.debug("Loaded ${businesses.length} businesses with available shares");
     return businesses;
   }
 }

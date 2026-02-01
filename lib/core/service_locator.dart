@@ -6,6 +6,8 @@ import "package:capital_commons/core/logger.dart";
 import "package:capital_commons/features/user/user_cubit.dart";
 import "package:capital_commons/firebase_options.dart";
 import "package:capital_commons/repositories/business_repository.dart";
+import "package:capital_commons/repositories/holdings_repository.dart";
+import "package:capital_commons/repositories/transaction_repository.dart";
 import "package:capital_commons/repositories/user_info_repository.dart";
 import "package:cloud_firestore/cloud_firestore.dart";
 import "package:cloud_functions/cloud_functions.dart";
@@ -36,15 +38,15 @@ Future<void> configureDependencies() async {
   // Register clients
   getIt.registerLazySingleton(() => AuthClient());
   getIt.registerLazySingleton(() => ExchangeClient());
+  getIt.registerLazySingleton(() => FileStorageClient());
+  getIt.registerLazySingleton(() => PlProcessingClient());
 
   // Register repositories
   getIt.registerLazySingleton(() => BusinessRepository());
   getIt.registerLazySingleton(() => UserInfoRepository());
+  getIt.registerLazySingleton(() => HoldingsRepository());
+  getIt.registerLazySingleton(() => TransactionRepository());
 
   // Register UserCubit as singleton
   getIt.registerLazySingleton(() => UserCubit());
-
-  getIt.registerLazySingleton(() => FileStorageClient());
-
-  getIt.registerLazySingleton(() => PlProcessingClient());
 }
