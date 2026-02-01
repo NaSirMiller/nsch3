@@ -28,4 +28,18 @@ class AuthClient {
       );
     }
   }
+  
+  Future<void> signInWithEmailAndPassword({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      await _auth.signInWithEmailAndPassword(email: email, password: password);
+    } on FirebaseAuthException catch (e) {
+      Log.error("Sign in error: $e");
+      throw AuthClientException(e.message ?? "Failed to sign in");
+    }
+  }
+
+  User? get currentUser => _auth.currentUser;
 }
