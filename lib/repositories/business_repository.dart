@@ -1,4 +1,5 @@
 import "package:capital_commons/core/logger.dart";
+import "package:capital_commons/models/business.dart";
 import "package:capital_commons/models/create_business.dart";
 import "package:cloud_firestore/cloud_firestore.dart";
 
@@ -24,6 +25,28 @@ class BusinessRepository {
     } on FirebaseException catch (e) {
       Log.error(
         "FirebaseException occurred while creating business ${business.uid}: $e",
+      );
+      throw const BusinessRepositoryException("A FirebaseException occurred");
+    }
+  }
+
+  Future<Business?> getBusinessById(String businessId) async {
+    Log.trace("Fetching business with id $businessId");
+    try {
+      final doc = await _firestore
+          .collection(_businessesCollectionName)
+          .doc(businessId)
+          .get();
+
+      if (!doc.exists) {
+        Log.trace("Business with id $businessId not found");
+        return null;
+      }
+
+      return Business.fromJson(doc.data()!);
+    } on FirebaseException catch (e) {
+      Log.error(
+        "FirebaseException occurred while fetching business $businessId: $e",
       );
       throw const BusinessRepositoryException("A FirebaseException occurred");
     }
