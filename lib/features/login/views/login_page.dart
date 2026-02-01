@@ -35,22 +35,22 @@ class _LoginPageState extends State<LoginPage> {
       child: BlocConsumer<LoginCubit, LoginState>(
         listener: (context, state) {
           if (state.status == LoadingStatus.success) {
-            ScaffoldMessenger.of(context).hideCurrentSnackBar(); // hides any previous SnackBar
+            ScaffoldMessenger.of(
+              context,
+            ).hideCurrentSnackBar(); // hides any previous SnackBar
 
             // TO DO: MODIFY ROUTE BASED ON USER TYPE
             context.go("/investor/dashboard");
-
-
           } else if (state.status == LoadingStatus.failure) {
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar() // hides any previous SnackBar
-            ..showSnackBar(
-              SnackBar(
-                content: Text(state.errorMessage ?? "Login failed"),
-                backgroundColor: Colors.redAccent,
-                duration: const Duration(seconds: 3),
-              ),
-            );
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar() // hides any previous SnackBar
+              ..showSnackBar(
+                SnackBar(
+                  content: Text(state.errorMessage ?? "Login failed"),
+                  backgroundColor: Colors.redAccent,
+                  duration: const Duration(seconds: 3),
+                ),
+              );
           }
         },
         builder: (context, state) {
@@ -126,14 +126,15 @@ class _LoginPageState extends State<LoginPage> {
                             obscurePassword: _obscurePassword,
                             isLoading: isLoading,
                             onObscureToggle: () {
-                              setState(() =>
-                                  _obscurePassword = !_obscurePassword);
+                              setState(
+                                () => _obscurePassword = !_obscurePassword,
+                              );
                             },
                             onLogin: () {
                               context.read<LoginCubit>().login(
-                                    email: _emailController.text,
-                                    password: _passwordController.text,
-                                  );
+                                email: _emailController.text,
+                                password: _passwordController.text,
+                              );
                             },
                           ),
                         ),
@@ -304,8 +305,9 @@ class _LoginCard extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF4A90D9),
                 foregroundColor: Colors.white,
-                disabledBackgroundColor:
-                    const Color(0xFF4A90D9).withOpacity(0.5),
+                disabledBackgroundColor: const Color(
+                  0xFF4A90D9,
+                ).withOpacity(0.5),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -403,12 +405,14 @@ class _InputField extends StatelessWidget {
   final String label;
   final IconData icon;
   final bool obscureText;
+  final TextInputType? keyboardType;
   final Widget? suffixIcon;
 
   const _InputField({
     required this.controller,
     required this.label,
     required this.icon,
+    this.keyboardType,
     this.obscureText = false,
     this.suffixIcon,
   });
