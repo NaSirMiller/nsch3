@@ -93,48 +93,25 @@ def get_revenue_and_expenses_from_pl_statement(
         }
 
     try:
-        data = req.get_json(force=True, silent=True)
+        data = req.data
 
         if data is None:
             logger.error("pl_statement_path is not valid (empty or None)")
-            return https_fn.Response(
-                response=json.dumps({"status": 400, "error": "Invalid request"}),
-                status=400,
-                headers=headers,
-            )
+            return {"status": 400, "error": "Invalid request"}
 
         pl_statement_path = data.get("pl_statement_path")
 
         if not pl_statement_path:
             logger.error("pl_statement_path is not valid (empty or None)")
-            return https_fn.Response(
-                response=json.dumps(
-                    {"status": 400, "error": "pl_statement_path is required"}
-                ),
-                status=400,
-                headers=headers,
-            )
+            return {"status": 400, "error": "pl_statement_path is required"}
 
         rev_and_expenses = doc_client.get_statement_details(pl_statement_path)
     except DocumentExtractionsError as e:
         logger.error(f"DocumentExtractionError occurred: {e}")
         return {"status": 500, "error": "An internal error occurred"}
 
-        return https_fn.Response(
-            response=json.dumps(rev_and_expenses), status=200, headers=headers
-        )
-
-    except DocumentExtractionsError as e:
-        logger.error(f"DocumentExtractionsError: {e}")
-        return https_fn.Response(
-            response=json.dumps({"status": 500, "error": "An internal error occurred"}),
-            status=500,
-            headers=headers,
-        )
     except Exception as e:
         logger.error(f"Unexpected error: {e}")
-        return https_fn.Response(
-            response=json.dumps({"status": 500, "error": "An internal error occurred"}),
-            status=500,
-            headers=headers,
-        )
+        return {"status": 500, "error": "An internal error occurred"}
+
+    return {**rev_and_expenses, "status": 200}
