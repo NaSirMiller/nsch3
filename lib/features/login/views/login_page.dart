@@ -3,6 +3,8 @@ import "package:flutter_bloc/flutter_bloc.dart";
 import "package:go_router/go_router.dart";
 import "package:capital_commons/features/login/cubit/login_cubit.dart";
 import "package:capital_commons/features/login/cubit/login_state.dart";
+import "package:capital_commons/features/user/user_cubit.dart";
+import "package:capital_commons/core/service_locator.dart";
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -35,15 +37,22 @@ class _LoginPageState extends State<LoginPage> {
       child: BlocConsumer<LoginCubit, LoginState>(
         listener: (context, state) {
           if (state.status == LoadingStatus.success) {
-            ScaffoldMessenger.of(
-              context,
-            ).hideCurrentSnackBar(); // hides any previous SnackBar
+            ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
-            // TO DO: MODIFY ROUTE BASED ON USER TYPE
-            context.go("/investor/dashboard");
+            // Get user info to determine route
+            final userCubit = getIt<UserCubit>();
+            final currentUser = userCubit.state.currentUser;
+            final isSeller = currentUser?.userInfo?.isSeller ?? false;
+
+            // Route based on user type
+            if (isSeller) {
+              context.go("/business/dashboard");
+            } else {
+              context.go("/market");
+            }
           } else if (state.status == LoadingStatus.failure) {
             ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar() // hides any previous SnackBar
+              ..hideCurrentSnackBar()
               ..showSnackBar(
                 SnackBar(
                   content: Text(state.errorMessage ?? "Login failed"),
