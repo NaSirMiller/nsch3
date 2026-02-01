@@ -1,18 +1,16 @@
 import "package:flutter/cupertino.dart";
 import "package:go_router/go_router.dart";
-
 import "package:capital_commons/features/landing/views/landing_page.dart";
 import "package:capital_commons/features/signup/views/signup_page.dart";
 import "package:capital_commons/features/login/views/login_page.dart";
-
 import "package:capital_commons/features/investor_signup/views/investor_signup_page.dart";
 import "package:capital_commons/features/business_signup/views/business_signup_page.dart";
-
 import "package:capital_commons/features/investor_dashboard/views/investor_dashboard_page.dart";
 import "package:capital_commons/features/business_dashboard/views/business_dashboard_page.dart";
-
 import "package:capital_commons/features/market/views/market_page.dart";
 import "package:capital_commons/features/market/views/business_detail_page.dart";
+import "package:capital_commons/features/market/views/secondary_market_page.dart";
+import "package:capital_commons/features/market/views/secondary_listing_detail_page.dart";
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -20,10 +18,7 @@ final goRouter = GoRouter(
   navigatorKey: rootNavigatorKey,
   routes: [
     /// Landing
-    GoRoute(
-      path: "/",
-      builder: (_, _) => const LandingPage(),
-    ),
+    GoRoute(path: "/", builder: (_, _) => const LandingPage()),
 
     /// Signup
     GoRoute(
@@ -42,10 +37,7 @@ final goRouter = GoRouter(
     ),
 
     /// Login
-    GoRoute(
-      path: "/login",
-      builder: (_, _) => const LoginPage(),
-    ),
+    GoRoute(path: "/login", builder: (_, _) => const LoginPage()),
 
     /// Dashboards
     GoRoute(
@@ -57,16 +49,22 @@ final goRouter = GoRouter(
       builder: (_, _) => const InvestorDashboardPage(),
     ),
 
-    /// Market
+    /// Market - Order matters! Specific routes before parameterized routes
+    GoRoute(path: "/market", builder: (_, _) => const MarketPage()),
     GoRoute(
-      path: "/market",
-      builder: (_, _) => const MarketPage(),
+      path: "/market/secondary",
+      builder: (_, _) => const SecondaryMarketPage(),
+    ),
+    GoRoute(
+      path: "/market/secondary/:listingId",
+      builder: (_, state) => SecondaryListingDetailPage(
+        listingId: state.pathParameters["listingId"]!,
+      ),
     ),
     GoRoute(
       path: "/market/:id",
-      builder: (_, state) => BusinessDetailPage(
-        businessId: state.pathParameters["id"]!,
-      ),
+      builder: (_, state) =>
+          BusinessDetailPage(businessId: state.pathParameters["id"]!),
     ),
   ],
 );

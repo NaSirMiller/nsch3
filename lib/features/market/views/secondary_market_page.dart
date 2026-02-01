@@ -1,13 +1,14 @@
+// features/market/views/secondary_market_page.dart
 import "package:flutter/material.dart";
 import "package:flutter_hooks/flutter_hooks.dart";
 import "package:go_router/go_router.dart";
-import "../widgets/business_card.dart";
-import "../widgets/filter_chip_row.dart";
+import "../widgets/share_listing_card.dart";
 import "../widgets/market_type_toggle.dart";
+import "../widgets/filter_chip_row.dart";
 import "../widgets/search_bar.dart" as market;
 
-class MarketPage extends HookWidget {
-  const MarketPage({super.key});
+class SecondaryMarketPage extends HookWidget {
+  const SecondaryMarketPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -18,95 +19,46 @@ class MarketPage extends HookWidget {
     final searchController = useTextEditingController();
     final selectedCategory = useState<String?>(null);
 
-    // Mock business data
-    final businesses = [
+    // Mock secondary market listings
+    final listings = [
       {
         "id": "1",
-        "name": "Capital Coffee Co.",
-        "category": "Food & Beverage",
-        "location": "Troy, NY",
+        "businessName": "Capital Coffee Co.",
+        "businessId": "1",
+        "seller": "Alice Johnson",
+        "shares": 50,
+        "pricePerShare": 130.0,
+        "originalPrice": 125.0,
+        "listedDate": "2 days ago",
         "logo": Icons.local_cafe,
-        "price": 125.0,
-        "raised": 87500.0,
-        "goal": 100000.0,
-        "investors": 24,
-        "dividend": 5.0,
-        "verified": true,
-        "description": "Artisan coffee roastery serving the Capital Region",
+        "category": "Food & Beverage",
       },
       {
         "id": "2",
-        "name": "Troy Tech Solutions",
-        "category": "Technology",
-        "location": "Troy, NY",
+        "businessName": "Troy Tech Solutions",
+        "businessId": "2",
+        "seller": "Bob Smith",
+        "shares": 25,
+        "pricePerShare": 210.0,
+        "originalPrice": 200.0,
+        "listedDate": "5 hours ago",
         "logo": Icons.computer,
-        "price": 200.0,
-        "raised": 120000.0,
-        "goal": 150000.0,
-        "investors": 45,
-        "dividend": 7.0,
-        "verified": true,
-        "description": "Software development and IT consulting firm",
+        "category": "Technology",
       },
       {
         "id": "3",
-        "name": "Hudson Valley Bakery",
-        "category": "Food & Beverage",
-        "location": "Albany, NY",
-        "logo": Icons.bakery_dining,
-        "price": 75.0,
-        "raised": 45000.0,
-        "goal": 75000.0,
-        "investors": 18,
-        "dividend": 4.5,
-        "verified": true,
-        "description": "Fresh-baked goods using local ingredients",
-      },
-      {
-        "id": "4",
-        "name": "Capital Fitness",
-        "category": "Health & Wellness",
-        "location": "Schenectady, NY",
-        "logo": Icons.fitness_center,
-        "price": 100.0,
-        "raised": 60000.0,
-        "goal": 100000.0,
-        "investors": 32,
-        "dividend": 6.0,
-        "verified": false,
-        "description": "Modern gym with personal training services",
-      },
-      {
-        "id": "5",
-        "name": "Saratoga Crafts",
-        "category": "Retail",
-        "location": "Saratoga Springs, NY",
-        "logo": Icons.shopping_bag,
-        "price": 150.0,
-        "raised": 90000.0,
-        "goal": 120000.0,
-        "investors": 28,
-        "dividend": 5.5,
-        "verified": true,
-        "description": "Handmade crafts and local artisan goods",
-      },
-      {
-        "id": "6",
-        "name": "Green Energy Co.",
-        "category": "Energy",
-        "location": "Albany, NY",
+        "businessName": "Green Energy Co.",
+        "businessId": "6",
+        "seller": "Carol White",
+        "shares": 100,
+        "pricePerShare": 245.0,
+        "originalPrice": 250.0,
+        "listedDate": "1 day ago",
         "logo": Icons.energy_savings_leaf,
-        "price": 250.0,
-        "raised": 180000.0,
-        "goal": 200000.0,
-        "investors": 52,
-        "dividend": 8.0,
-        "verified": true,
-        "description": "Solar panel installation and energy consulting",
+        "category": "Energy",
       },
     ];
 
-    // Calculate grid crossAxisCount
     int getCrossAxisCount() {
       if (isDesktop) return 3;
       if (isTablet) return 2;
@@ -134,8 +86,16 @@ class MarketPage extends HookWidget {
                 floating: true,
                 backgroundColor: Colors.transparent,
                 elevation: 0,
+                leading: IconButton(
+                  onPressed: () => context.go("/market"),
+                  icon: const Icon(
+                    Icons.arrow_back_ios_new_rounded,
+                    color: Colors.white70,
+                    size: 20,
+                  ),
+                ),
                 title: const Text(
-                  "Marketplace",
+                  "Secondary Market",
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w600,
@@ -159,7 +119,7 @@ class MarketPage extends HookWidget {
                 ],
               ),
 
-              // Search and filters
+              // Header
               SliverPadding(
                 padding: EdgeInsets.symmetric(
                   horizontal: isDesktop ? 40 : (isTablet ? 24 : 16),
@@ -169,9 +129,8 @@ class MarketPage extends HookWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Header text
                       const Text(
-                        "Invest in Capital Region Businesses",
+                        "Buy Shares from Other Investors",
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
@@ -180,21 +139,20 @@ class MarketPage extends HookWidget {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        "${businesses.length} businesses available",
+                        "${listings.length} listings available",
                         style: TextStyle(
                           fontSize: 14,
                           color: Colors.white.withOpacity(0.6),
                         ),
                       ),
-
                       const SizedBox(height: 20),
 
                       // Market type toggle
                       MarketTypeToggle(
-                        selectedType: MarketType.primary,
+                        selectedType: MarketType.secondary,
                         onTypeChanged: (type) {
-                          if (type == MarketType.secondary) {
-                            context.push("/market/secondary");
+                          if (type == MarketType.primary) {
+                            context.go("/market");
                           }
                         },
                       ),
@@ -217,7 +175,7 @@ class MarketPage extends HookWidget {
                 ),
               ),
 
-              // Business grid
+              // Listings grid
               SliverPadding(
                 padding: EdgeInsets.symmetric(
                   horizontal: isDesktop ? 40 : (isTablet ? 24 : 16),
@@ -225,30 +183,26 @@ class MarketPage extends HookWidget {
                 sliver: SliverGrid(
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: getCrossAxisCount(),
-                    childAspectRatio: isDesktop
-                        ? 0.85
-                        : (isTablet ? 0.8 : 0.75),
+                    childAspectRatio: isDesktop ? 0.9 : (isTablet ? 0.85 : 0.8),
                     crossAxisSpacing: 16,
                     mainAxisSpacing: 16,
                   ),
                   delegate: SliverChildBuilderDelegate((context, index) {
-                    final business = businesses[index];
-                    return BusinessCard(
-                      name: business["name"] as String,
-                      category: business["category"] as String,
-                      location: business["location"] as String,
-                      logo: business["logo"] as IconData,
-                      price: business["price"] as double,
-                      raised: business["raised"] as double,
-                      goal: business["goal"] as double,
-                      investors: business["investors"] as int,
-                      dividend: business["dividend"] as double,
-                      verified: business["verified"] as bool,
+                    final listing = listings[index];
+                    return ShareListingCard(
+                      businessName: listing["businessName"] as String,
+                      seller: listing["seller"] as String,
+                      shares: listing["shares"] as int,
+                      pricePerShare: listing["pricePerShare"] as double,
+                      originalPrice: listing["originalPrice"] as double,
+                      listedDate: listing["listedDate"] as String,
+                      logo: listing["logo"] as IconData,
+                      category: listing["category"] as String,
                       onTap: () {
-                        context.push("/market/${business["id"]}");
+                        context.push("/market/secondary/${listing["id"]}");
                       },
                     );
-                  }, childCount: businesses.length),
+                  }, childCount: listings.length),
                 ),
               ),
 
