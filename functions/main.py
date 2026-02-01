@@ -1,7 +1,3 @@
-# Welcome to Cloud Functions for Firebase for Python!
-# To get started, simply uncomment the below code or create your own.
-# Deploy with `firebase deploy`
-
 from typing import Optional
 
 from firebase_admin import initialize_app
@@ -17,6 +13,12 @@ from core.logger import logger
 from services.exchange_shares_service import (
     ExchangeSharesServiceError,
     exchange_shares_service,
+)
+from clients.document_text_extraction_client import (
+    DocumentExtractionsError,
+    DocumentTextExtractionClient,
+    doc_client,
+    router_client,
 )
 
 # For cost control, you can set the maximum number of containers that can be
@@ -57,3 +59,24 @@ def exchange_business_to_investor(req: https_fn.Request) -> https_fn.Response:
         return https_fn.Response({"status": 500, "error": "An internal error occurred"})
 
     return https_fn.Response({"status": 200})
+
+
+@https_fn.on_request()
+def get_revenue_and_expenses_from_pl_statement(
+    req: https_fn.Request,
+) -> https_fn.Response:
+    data = req.get_json()
+    pl_statement_path = data.get("pl_statement_path")
+
+    if not pl_statement_path:
+        logger.error("pl_statement_path is not valid (empty or None)")
+        return https_fn.Response(
+            {"status": 400, "error": "pl_statement_path is not valid (empty or None)"}
+        )
+
+    try:
+        rev_and_expenses = doc_client.get_statement_details(pl_statement_path)
+    except DocumentExtractionsError as e:
+        return https_fn.Response({"status": 500, "error": "An internal error occurred"})
+
+    return rev_and_expenses
