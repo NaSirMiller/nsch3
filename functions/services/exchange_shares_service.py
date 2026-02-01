@@ -1,7 +1,6 @@
 from datetime import datetime, timezone
 
 from firebase_admin.firestore import firestore
-
 from models.transaction.create_transaction import CreateTransaction
 from repositories.business_repository import (
     BusinessRepositoryError,
@@ -63,7 +62,6 @@ class ExchangeSharesService:
                 ticker=business.ticker,
                 num_shares=num_shares,
                 share_price=business.sharePrice,
-                transaction=transaction,
             )
 
         run_transaction(_firestore_client.transaction())

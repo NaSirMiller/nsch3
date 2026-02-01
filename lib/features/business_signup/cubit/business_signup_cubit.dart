@@ -70,17 +70,6 @@ class BusinessSignupCubit extends Cubit<BusinessSignupState> {
       return;
     }
 
-    // if (state.valuation == null) {
-    //   Log.error("Valuation is null");
-    //   emit(
-    //     state.copyWith(
-    //       storeBusinessInfoStatus: LoadingStatus.failure,
-    //       message: "An error occurred",
-    //     ),
-    //   );
-    //   emit(state.copyWith(message: null));
-    //   return;
-    // }
     // TODO: Add profile logo path to the store business info method
     try {
       await _userRepository.saveUserInfo(
@@ -114,6 +103,8 @@ class BusinessSignupCubit extends Cubit<BusinessSignupState> {
           numInvestors: 0,
           goal: -1, // TODO: Get from eval results
           yearFounded: year,
+          sharesAvailable: totalShares,
+          ticker: businessName.substring(0, 3),
         ),
       );
     } catch (_) {
