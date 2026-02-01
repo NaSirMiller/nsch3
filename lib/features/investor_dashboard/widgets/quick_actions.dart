@@ -12,19 +12,11 @@ class QuickActions extends StatelessWidget {
         children: [
           const SizedBox(height: 16),
 
-          _ActionButton(
-            icon: Icons.assessment_outlined,
-            label: "Report Profits",
-            subtitle: "Q1 2025 reporting due",
-            color: const Color(0xFF4A90D9),
-            onTap: () {},
-          ),
-
           const SizedBox(height: 12),
 
           _ActionButton(
             icon: Icons.edit_outlined,
-            label: "Update Business Info",
+            label: "Update Investor Info",
             subtitle: "Keep your profile current",
             color: const Color(0xFF9B59B6),
             onTap: () {},
@@ -37,16 +29,6 @@ class QuickActions extends StatelessWidget {
             label: "View Analytics",
             subtitle: "Detailed performance metrics",
             color: const Color(0xFFE74C3C),
-            onTap: () {},
-          ),
-
-          const SizedBox(height: 12),
-
-          _ActionButton(
-            icon: Icons.message_outlined,
-            label: "Message Investors",
-            subtitle: "Send updates to shareholders",
-            color: const Color(0xFF2ECC71),
             onTap: () {},
           ),
         ],

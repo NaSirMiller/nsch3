@@ -1,7 +1,6 @@
 import "package:flutter/material.dart";
-import "shared/dashboard_section.dart";
-import "shared/investor_row.dart";
-
+import "package:capital_commons/shared/dashboard_section.dart";
+import "package:capital_commons/shared/investor_row.dart";
 class InvestorList extends StatelessWidget {
   const InvestorList({super.key});
 
