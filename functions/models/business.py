@@ -19,3 +19,4 @@ class Business(BaseModel):
     divdendPercentage: Optional[float]
     isApproved: bool
     ticker: str
+    address: str
