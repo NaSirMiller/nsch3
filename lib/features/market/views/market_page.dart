@@ -148,10 +148,13 @@ class MarketPage extends HookWidget {
                     color: Colors.white70,
                   ),
                   IconButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      context.push("/investor/dashboard");
+                    },
                     icon: const Icon(Icons.person_outline),
                     color: Colors.white70,
                   ),
+
                   const SizedBox(width: 8),
                 ],
               ),

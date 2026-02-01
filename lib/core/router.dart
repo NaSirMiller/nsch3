@@ -1,6 +1,7 @@
 import "package:capital_commons/features/business_dashboard/views/business_dashboard_page.dart";
 import "package:capital_commons/features/business_signup/views/business_signup_page.dart";
 import "package:capital_commons/features/investor_signup/views/investor_signup_page.dart";
+import "package:capital_commons/features/investor_dashboard/views/investor_dashboard_page.dart";
 import "package:capital_commons/features/landing/views/landing_page.dart";
 import "package:capital_commons/features/login/views/login_page.dart";
 import "package:capital_commons/features/market/views/business_detail_page.dart";
@@ -15,6 +16,7 @@ final goRouter = GoRouter(
   navigatorKey: rootNavigatorKey,
   routes: [
     GoRoute(path: "/", builder: (_, _) => const LandingPage()),
+
     GoRoute(
       path: "/signup",
       builder: (_, _) => const SignupPage(),
@@ -29,11 +31,20 @@ final goRouter = GoRouter(
         ),
       ],
     ),
+
     GoRoute(path: "/login", builder: (_, _) => const LoginPage()),
+
+    // Dashboards
     GoRoute(
       path: "/business/dashboard",
       builder: (_, _) => const BusinessDashboardPage(),
     ),
+    GoRoute(
+      path: "/investor/dashboard",
+      builder: (_, _) => const InvestorDashboardPage(),
+    ),
+
+    // Market
     GoRoute(path: "/market", builder: (_, _) => const MarketPage()),
     GoRoute(
       path: "/market/:id",
