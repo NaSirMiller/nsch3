@@ -1,6 +1,8 @@
 import "package:capital_commons/clients/auth_client.dart";
 import "package:capital_commons/core/logger.dart";
 import "package:capital_commons/firebase_options.dart";
+import "package:capital_commons/repositories/business_repository.dart";
+import "package:cloud_firestore/cloud_firestore.dart";
 import "package:firebase_auth/firebase_auth.dart";
 import "package:firebase_core/firebase_core.dart";
 import "package:flutter/foundation.dart";
@@ -13,7 +15,7 @@ Future<void> configureDependencies() async {
 
   if (kDebugMode) {
     try {
-      // FirebaseFirestore.instance.useFirestoreEmulator("localhost", 8080);
+      FirebaseFirestore.instance.useFirestoreEmulator("localhost", 8080);
       await FirebaseAuth.instance.useAuthEmulator("localhost", 9099);
       // FirebaseFunctions.instance.useFunctionsEmulator("localhost", 5001);
       // await FirebaseStorage.instance.useStorageEmulator("localhost", 9199);
@@ -23,4 +25,5 @@ Future<void> configureDependencies() async {
   }
 
   getIt.registerLazySingleton(() => AuthClient());
+  getIt.registerLazySingleton(() => BusinessRepository());
 }

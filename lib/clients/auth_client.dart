@@ -1,4 +1,5 @@
 import "package:capital_commons/core/logger.dart";
+import "package:capital_commons/models/app_user.dart";
 import "package:firebase_auth/firebase_auth.dart";
 
 class AuthClientException implements Exception {
@@ -27,5 +28,21 @@ class AuthClient {
         "A FirebaseAuthException occurred during sign up",
       );
     }
+  }
+
+  Stream<AppUser?> get userChanges {
+    final userStream = _auth.userChanges();
+    return userStream.map((user) {
+      if (user == null) return null;
+      return AppUser(uid: user.uid, email: user.email);
+    });
+  }
+
+  AppUser? get currentUser {
+    final user = _auth.currentUser;
+    if (user == null) {
+      return null;
+    }
+    return AppUser(uid: user.uid, email: user.email);
   }
 }

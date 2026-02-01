@@ -6,17 +6,23 @@ import "shared/dropdown_field.dart";
 import "shared/action_button.dart";
 
 class Stage2BusinessInfo extends HookWidget {
-  const Stage2BusinessInfo({super.key, required this.onNext});
+  const Stage2BusinessInfo({
+    super.key,
+    required this.onNext,
+    required this.businessNameController,
+    required this.addressController,
+    required this.yearController,
+    required this.selectedType,
+  });
 
   final VoidCallback onNext;
+  final TextEditingController businessNameController;
+  final TextEditingController addressController;
+  final TextEditingController yearController;
+  final ValueNotifier<String?> selectedType;
 
   @override
   Widget build(BuildContext context) {
-    final businessNameController = useTextEditingController();
-    final addressController = useTextEditingController();
-    final yearController = useTextEditingController();
-    final selectedType = useState<String?>(null);
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [

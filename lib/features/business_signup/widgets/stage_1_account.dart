@@ -5,14 +5,19 @@ import "shared/input_field.dart";
 import "shared/action_button.dart";
 
 class Stage1Account extends HookWidget {
-  const Stage1Account({super.key, required this.onNext});
+  const Stage1Account({
+    super.key,
+    required this.onNext,
+    required this.emailController,
+    required this.passwordController,
+  });
 
   final VoidCallback onNext;
+  final TextEditingController emailController;
+  final TextEditingController passwordController;
 
   @override
   Widget build(BuildContext context) {
-    final emailController = useTextEditingController();
-    final passwordController = useTextEditingController();
     final obscurePassword = useState(true);
 
     return Column(

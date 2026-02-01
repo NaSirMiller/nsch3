@@ -5,16 +5,21 @@ import "shared/input_field.dart";
 import "shared/action_button.dart";
 
 class Stage5Shares extends HookWidget {
-  const Stage5Shares({super.key, required this.onNext});
+  const Stage5Shares({
+    super.key,
+    required this.onNext,
+    required this.totalSharesController,
+    required this.pricePerShareController,
+    required this.dividendController,
+  });
 
   final VoidCallback onNext;
+  final TextEditingController totalSharesController;
+  final TextEditingController pricePerShareController;
+  final TextEditingController dividendController;
 
   @override
   Widget build(BuildContext context) {
-    final totalSharesController = useTextEditingController(text: "1000");
-    final pricePerShareController = useTextEditingController(text: "100");
-    final dividendController = useTextEditingController(text: "5");
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [

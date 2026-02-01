@@ -7,17 +7,23 @@ import "shared/file_upload_box.dart";
 import "shared/action_button.dart";
 
 class Stage3Financials extends HookWidget {
-  const Stage3Financials({super.key, required this.onNext});
+  const Stage3Financials({
+    super.key,
+    required this.onNext,
+    required this.revenueController,
+    required this.expensesController,
+    required this.netProfitController,
+    required this.selectedPeriod,
+  });
 
   final VoidCallback onNext;
+  final TextEditingController revenueController;
+  final TextEditingController expensesController;
+  final TextEditingController netProfitController;
+  final ValueNotifier<String?> selectedPeriod;
 
   @override
   Widget build(BuildContext context) {
-    final revenueController = useTextEditingController();
-    final expensesController = useTextEditingController();
-    final netProfitController = useTextEditingController();
-    final selectedPeriod = useState<String?>(null);
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [

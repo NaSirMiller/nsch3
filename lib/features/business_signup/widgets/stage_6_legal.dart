@@ -4,14 +4,17 @@ import "shared/stage_title.dart";
 import "shared/action_button.dart";
 
 class Stage6Legal extends HookWidget {
-  const Stage6Legal({super.key, required this.onNext});
+  const Stage6Legal({
+    super.key,
+    required this.onNext,
+    required this.agreedToTerms,
+  });
 
   final VoidCallback onNext;
+  final ValueNotifier<bool> agreedToTerms;
 
   @override
   Widget build(BuildContext context) {
-    final agreedToTerms = useState(false);
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -25,10 +28,7 @@ class Stage6Legal extends HookWidget {
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.05),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: Colors.white.withOpacity(0.1),
-              width: 1,
-            ),
+            border: Border.all(color: Colors.white.withOpacity(0.1), width: 1),
           ),
           child: const Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -86,10 +86,7 @@ class Stage6Legal extends HookWidget {
 }
 
 class _LegalItem extends StatelessWidget {
-  const _LegalItem({
-    required this.icon,
-    required this.text,
-  });
+  const _LegalItem({required this.icon, required this.text});
 
   final IconData icon;
   final String text;
@@ -98,11 +95,7 @@ class _LegalItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(
-          icon,
-          color: const Color(0xFF4A90D9),
-          size: 20,
-        ),
+        Icon(icon, color: const Color(0xFF4A90D9), size: 20),
         const SizedBox(width: 12),
         Expanded(
           child: Text(
