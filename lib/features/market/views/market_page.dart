@@ -1,4 +1,7 @@
+import "package:capital_commons/clients/auth_client.dart";
+import "package:capital_commons/core/service_locator.dart";
 import "package:capital_commons/features/market/cubit/market_cubit.dart";
+import "package:capital_commons/repositories/user_info_repository.dart";
 import "package:flutter/material.dart";
 import "package:flutter_bloc/flutter_bloc.dart";
 import "package:flutter_hooks/flutter_hooks.dart";
@@ -155,8 +158,16 @@ class MarketPage extends HookWidget {
                           color: Colors.white70,
                         ),
                         IconButton(
-                          onPressed: () {
-                            context.push("/investor/dashboard");
+                          onPressed: () async {
+                            final user = await getIt<UserInfoRepository>()
+                                .getUserInfo(
+                                  getIt<AuthClient>().currentUser!.uid,
+                                );
+                            if (user!.isSeller) {
+                              context.go("/business/dashboard");
+                            } else {
+                              context.go("/investor/dashboard");
+                            }
                           },
                           icon: const Icon(Icons.person_outline),
                           color: Colors.white70,
