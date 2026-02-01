@@ -64,6 +64,10 @@ class ExchangeSharesService:
                 share_price=business.sharePrice,
             )
 
+            business_repository.increment_business_investors(
+                business_id, transaction=transaction
+            )
+
         run_transaction(_firestore_client.transaction())
 
 

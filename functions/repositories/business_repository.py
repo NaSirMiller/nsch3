@@ -1,10 +1,9 @@
-from firebase_admin.exceptions import FirebaseError
-from firebase_admin.firestore import firestore
-from pydantic import ValidationError
-
 from core import singletons
 from core.logger import logger
+from firebase_admin.exceptions import FirebaseError
+from firebase_admin.firestore import firestore
 from models.business import Business
+from pydantic import ValidationError
 
 
 class BusinessRepositoryError(Exception):
@@ -69,6 +68,39 @@ class BusinessRepository:
                 f"FirebaseError occurred while decrementing shares available: {e}",
                 business_id=business_id,
                 num_shares=num_shares,
+            )
+            raise BusinessRepositoryError("A FirebaseError occurred") from e
+
+    def increment_business_investors(
+        self,
+        business_id: str,
+        num_investors: int = 1,
+        transaction: firestore.Transaction | None = None,
+    ) -> None:
+        """
+        Increment the number of investors for a business atomically.
+        Defaults to incrementing by 1.
+        """
+        if num_investors <= 0:
+            raise ValueError("num_investors must be positive")
+
+        ref = self._firestore_client.collection(
+            self.businesses_collection_name
+        ).document(business_id)
+
+        try:
+            if transaction:
+                transaction.update(
+                    ref, {"numInvestors": firestore.Increment(num_investors)}
+                )
+            else:
+                ref.update({"numInvestors": firestore.Increment(num_investors)})
+        except FirebaseError as e:
+            logger.error(
+                "FirebaseError occurred while incrementing numInvestors",
+                error=e,
+                business_id=business_id,
+                num_investors=num_investors,
             )
             raise BusinessRepositoryError("A FirebaseError occurred") from e
 

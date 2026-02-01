@@ -28,21 +28,8 @@ class BusinessDetailPage extends HookWidget {
       create: (_) => BusinessDetailsCubit()..loadBusiness(businessId),
       child: BlocConsumer<BusinessDetailsCubit, BusinessDetailsState>(
         listener: (context, state) {
-          // Handle purchase status
-          if (state.purchaseStatus.isSuccess) {
-            context.showSnackbarMessage(
-              state.message ?? "Successfully purchased shares!",
-            );
-            context.read<BusinessDetailsCubit>().resetPurchaseStatus();
-          } else if (state.purchaseStatus.isFailure) {
-            context.showSnackbarMessage(
-              state.message ?? "Failed to purchase shares",
-            );
-            context.read<BusinessDetailsCubit>().resetPurchaseStatus();
-          }
-
           // Handle load business failure
-          if (state.loadBusinessStatus.isFailure && state.message != null) {
+          if (state.message != null) {
             context.showSnackbarMessage(state.message!);
           }
         },
@@ -149,10 +136,10 @@ class BusinessDetailPage extends HookWidget {
                           BusinessHero(
                             name: state.business!.name,
                             category: state.business!.industry,
-                            location: "Address not available", // TODO
+                            location: state.business!.address,
                             logo: Icons.image_not_supported,
                             verified: true,
-                            founded: "Year not available", // TODO
+                            founded: state.business!.yearFounded,
                           ),
 
                           const SizedBox(height: 24),
@@ -160,9 +147,9 @@ class BusinessDetailPage extends HookWidget {
                           // Stats
                           BusinessStats(
                             price: state.business!.sharePrice,
-                            raised: 0.0, // TODO
-                            goal: 0.0, // TODO
-                            investors: 0, // TODO
+                            raised: state.business!.amountRaised as double,
+                            goal: state.business!.goal,
+                            investors: state.business!.numInvestors,
                             dividend: state.business!.dividendPercentage,
                           ),
 
@@ -177,9 +164,9 @@ class BusinessDetailPage extends HookWidget {
                                   flex: 2,
                                   child: Column(
                                     children: [
-                                      const BusinessAbout(
+                                      BusinessAbout(
                                         description:
-                                            "Description not available", // TODO
+                                            state.business!.description,
                                       ),
                                       const SizedBox(height: 24),
                                       FinancialsSection(
@@ -197,7 +184,8 @@ class BusinessDetailPage extends HookWidget {
                                 Expanded(
                                   child: SharePurchaseCard(
                                     price: state.business!.sharePrice,
-                                    sharesAvailable: 0, // TODO
+                                    sharesAvailable:
+                                        state.business!.sharesAvailable,
                                     dividend:
                                         state.business!.dividendPercentage,
                                     businessId: businessId,
@@ -211,14 +199,14 @@ class BusinessDetailPage extends HookWidget {
                             // Stacked for mobile/tablet
                             SharePurchaseCard(
                               price: state.business!.sharePrice,
-                              sharesAvailable: 0, // TODO
+                              sharesAvailable: state.business!.sharesAvailable,
                               dividend: state.business!.dividendPercentage,
                               businessId: businessId,
                               isPurchasing: state.purchaseStatus.isLoading,
                             ),
                             const SizedBox(height: 24),
-                            const BusinessAbout(
-                              description: "Description not available", // TODO
+                            BusinessAbout(
+                              description: state.business!.description,
                             ),
                             const SizedBox(height: 24),
                             FinancialsSection(

@@ -61,6 +61,7 @@ class BusinessDetailsCubit extends Cubit<BusinessDetailsState> {
           message: "Business not loaded",
         ),
       );
+      emit(state.copyWith(message: null));
       return;
     }
 
@@ -79,6 +80,7 @@ class BusinessDetailsCubit extends Cubit<BusinessDetailsState> {
           message: "Successfully purchased $numShares shares!",
         ),
       );
+      emit(state.copyWith(message: null));
 
       // Reload business to get updated data
       await loadBusiness(state.business!.uid);
@@ -90,6 +92,7 @@ class BusinessDetailsCubit extends Cubit<BusinessDetailsState> {
           message: e.message,
         ),
       );
+      emit(state.copyWith(message: null));
     } catch (e) {
       Log.error("Unexpected error during purchase: $e");
       emit(
@@ -98,6 +101,7 @@ class BusinessDetailsCubit extends Cubit<BusinessDetailsState> {
           message: "Failed to purchase shares",
         ),
       );
+      emit(state.copyWith(message: null));
     }
   }
 
