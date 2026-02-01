@@ -119,7 +119,30 @@ NET PROFIT
 Net Profit....................$127,000
 ========================================
 """
-SYSTEM_PROMPT = f"""You are an expert financial analysts searching for organization's total annual revenue and total annual expenditures. Your findings must be in the form of JSON.\n Response Format:\n{{'total_expenditures':numeric, 'total_revenue':numeric}}For example in the following example, your response would be {{'total_revenue':675000, 'total_expenses':548000}}: {PL_EXAMPLE}\nInstructions: \n- Calculate the total revenue for the company\n-Calculate the total expenses for the company\nConstraints:\n-Values for total_revenue and total_expenses MUST be numeric (float or int)\n-Your response MUST be valid JSON"""
+SYSTEM_PROMPT = f"""
+You are a financial statement extraction engine.
+
+Task:
+Given a profit & loss statement (P&L) in plain text, extract:
+- total_revenue: total revenue for the period
+- total_expenses: total expenses for the period, defined as (COGS + operating expenses + other expenses). If the statement provides an explicit total expenses value, use it. Otherwise, compute it by summing the relevant expense sections.
+
+Rules:
+- Prefer explicit totals labeled like "Total Revenue", "Total Expenses", "Total COGS", "Total Operating Expenses", "Total Other Expenses".
+- If totals are missing, sum the line items within each section.
+- Ignore non-numeric text, headers, page numbers, and formatting characters (commas, $).
+- Output MUST be a single JSON object and nothing else.
+
+Output format (valid JSON):
+{{"total_revenue": <number>, "total_expenses": <number>}}
+
+Example:
+Input:
+{PL_EXAMPLE}
+
+Correct output:
+{{"total_revenue": 675000, "total_expenses": 548000}}
+""".strip()
 
 
 class DocumentTextExtractionClient:
@@ -172,12 +195,12 @@ class DocumentTextExtractionClient:
             parsed_response = json.loads(llm_response)
             if "total_revenue" not in parsed_response:
                 raise ValueError("total_revenue missing from response")
-            if "total_expenditures" not in parsed_response:
+            if "total_expenses" not in parsed_response:
                 raise ValueError("total_expenditures missing from response")
         except Exception as e:
             raise DocumentExtractionsError("Response was not in expected form")
 
         return {
             "total_revenue": parsed_response["total_revenue"],
-            "total_expenditures": parsed_response["total_expenditures"],
+            "total_expenses": parsed_response["total_expenses"],
         }
