@@ -61,7 +61,6 @@ final mockBusinesses = [
   ),
 ];
 
-
 class InvestorDashboardPage extends HookWidget {
   const InvestorDashboardPage({super.key});
 
@@ -77,11 +76,7 @@ class InvestorDashboardPage extends HookWidget {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF0A1628),
-              Color(0xFF1A2E4A),
-              Color(0xFF0D3B66),
-            ],
+            colors: [Color(0xFF0A1628), Color(0xFF1A2E4A), Color(0xFF0D3B66)],
           ),
         ),
         child: SafeArea(
@@ -92,6 +87,7 @@ class InvestorDashboardPage extends HookWidget {
                 floating: true,
                 backgroundColor: Colors.transparent,
                 elevation: 0,
+                iconTheme: const IconThemeData(color: Colors.white),
                 title: const Text(
                   "Investor Dashboard",
                   style: TextStyle(
@@ -145,7 +141,9 @@ class InvestorDashboardPage extends HookWidget {
                                 const SizedBox(height: 24),
 
                                 // Available businesses
-                                AvailableBusinessesList(businesses: mockBusinesses),
+                                AvailableBusinessesList(
+                                  businesses: mockBusinesses,
+                                ),
                               ],
                             ),
                           ),
