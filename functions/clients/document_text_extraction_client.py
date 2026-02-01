@@ -204,3 +204,11 @@ class DocumentTextExtractionClient:
             "total_revenue": parsed_response["total_revenue"],
             "total_expenses": parsed_response["total_expenses"],
         }
+
+
+router_client: OpenRouterClient = OpenRouterClient(
+    model_name="deepseek/deepseek-chat-v3.1", api_key=""
+)
+doc_client: DocumentTextExtractionClient = DocumentTextExtractionClient(
+    open_router_client=router_client
+)
