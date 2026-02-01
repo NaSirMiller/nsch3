@@ -1,4 +1,6 @@
 import "package:capital_commons/features/business_signup/cubit/business_signup_cubit.dart";
+import "package:capital_commons/features/business_signup/widgets/stage_3_financials_upload.dart";
+import "package:capital_commons/features/business_signup/widgets/stage_3a_financial_summary.dart";
 import "package:flutter/material.dart";
 import "package:flutter_bloc/flutter_bloc.dart";
 import "package:flutter_hooks/flutter_hooks.dart";
@@ -6,7 +8,6 @@ import "package:go_router/go_router.dart";
 import "package:capital_commons/features/business_signup/widgets/stage_progress.dart";
 import "package:capital_commons/features/business_signup/widgets/stage_1_account.dart";
 import "package:capital_commons/features/business_signup/widgets/stage_2_business_info.dart";
-import "package:capital_commons/features/business_signup/widgets/stage_3_financials.dart";
 import "package:capital_commons/features/business_signup/widgets/stage_4_valuation.dart";
 import "package:capital_commons/features/business_signup/widgets/stage_5_shares.dart";
 import "package:capital_commons/features/business_signup/widgets/stage_6_legal.dart";
@@ -112,68 +113,92 @@ class BusinessSignupPage extends HookWidget {
                       horizontal: 24.0,
                       vertical: 40,
                     ),
-                    child: Container(
-                      constraints: BoxConstraints(
-                        maxWidth: isDesktop ? 800 : 600,
-                      ),
-                      child: Column(
-                        children: [
-                          // Progress indicator
-                          StageProgress(
-                            currentStage: currentStage.value,
-                            stages: stages,
-                          ),
+                    child:
+                        BlocListener<BusinessSignupCubit, BusinessSignupState>(
+                          listenWhen: (previous, current) =>
+                              previous.plProcessingResult !=
+                                  current.plProcessingResult &&
+                              current.plProcessingResult != null,
+                          listener: (context, state) {
+                            final result = state.plProcessingResult!;
 
-                          const SizedBox(height: 40),
+                            final revenue = result.totalRevenue;
+                            final expenses = result.totalExpenses;
+                            final netProfit = revenue - expenses;
 
-                          // Stage content card
-                          Container(
-                            padding: const EdgeInsets.all(40),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.08),
-                              borderRadius: BorderRadius.circular(24),
-                              border: Border.all(
-                                color: Colors.white.withOpacity(0.15),
-                                width: 1.5,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.3),
-                                  blurRadius: 30,
-                                  offset: const Offset(0, 10),
+                            revenueController.text = revenue.toStringAsFixed(2);
+                            expensesController.text = expenses.toStringAsFixed(
+                              2,
+                            );
+                            netProfitController.text = netProfit
+                                .toStringAsFixed(2);
+                          },
+                          child: Container(
+                            constraints: BoxConstraints(
+                              maxWidth: isDesktop ? 800 : 600,
+                            ),
+                            child: Column(
+                              children: [
+                                // Progress indicator
+                                StageProgress(
+                                  currentStage: currentStage.value,
+                                  stages: stages,
+                                ),
+
+                                const SizedBox(height: 40),
+
+                                // Stage content card
+                                Container(
+                                  padding: const EdgeInsets.all(40),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.08),
+                                    borderRadius: BorderRadius.circular(24),
+                                    border: Border.all(
+                                      color: Colors.white.withOpacity(0.15),
+                                      width: 1.5,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.3),
+                                        blurRadius: 30,
+                                        offset: const Offset(0, 10),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Builder(
+                                    builder: (context) {
+                                      return _buildStageContent(
+                                        context: context,
+                                        stage: currentStage.value,
+                                        onNext: nextStage,
+                                        emailController: emailController,
+                                        passwordController: passwordController,
+                                        businessNameController:
+                                            businessNameController,
+                                        addressController: addressController,
+                                        yearController: yearController,
+                                        descriptionController:
+                                            descriptionController,
+                                        selectedType: selectedType,
+                                        revenueController: revenueController,
+                                        expensesController: expensesController,
+                                        netProfitController:
+                                            netProfitController,
+                                        selectedPeriod: selectedPeriod,
+                                        totalSharesController:
+                                            totalSharesController,
+                                        pricePerShareController:
+                                            pricePerShareController,
+                                        dividendController: dividendController,
+                                        agreedToTerms: agreedToTerms,
+                                      );
+                                    },
+                                  ),
                                 ),
                               ],
                             ),
-                            child: Builder(
-                              builder: (context) {
-                                return _buildStageContent(
-                                  context: context,
-                                  stage: currentStage.value,
-                                  onNext: nextStage,
-                                  emailController: emailController,
-                                  passwordController: passwordController,
-                                  businessNameController:
-                                      businessNameController,
-                                  addressController: addressController,
-                                  yearController: yearController,
-                                  descriptionController: descriptionController,
-                                  selectedType: selectedType,
-                                  revenueController: revenueController,
-                                  expensesController: expensesController,
-                                  netProfitController: netProfitController,
-                                  selectedPeriod: selectedPeriod,
-                                  totalSharesController: totalSharesController,
-                                  pricePerShareController:
-                                      pricePerShareController,
-                                  dividendController: dividendController,
-                                  agreedToTerms: agreedToTerms,
-                                );
-                              },
-                            ),
                           ),
-                        ],
-                      ),
-                    ),
+                        ),
                   ),
                 ),
               ),
@@ -222,23 +247,30 @@ class BusinessSignupPage extends HookWidget {
         );
 
       case 2:
-        return Stage3Financials(
+        return Stage3FinancialsUpload(
+          onNext: () {
+            context.read<BusinessSignupCubit>().uploadAndProcessPlFile();
+            onNext();
+          },
+        );
+      case 3:
+        return Stage3aFinancialSummary(
           onNext: onNext,
           revenueController: revenueController,
           expensesController: expensesController,
           netProfitController: netProfitController,
           selectedPeriod: selectedPeriod,
         );
-      case 3:
-        return Stage4Valuation(onNext: onNext);
       case 4:
+        return Stage4Valuation(onNext: onNext);
+      case 5:
         return Stage5Shares(
           onNext: onNext,
           totalSharesController: totalSharesController,
           pricePerShareController: pricePerShareController,
           dividendController: dividendController,
         );
-      case 5:
+      case 6:
         return Stage6Legal(
           onNext: () {
             onNext();
@@ -261,7 +293,7 @@ class BusinessSignupPage extends HookWidget {
           },
           agreedToTerms: agreedToTerms,
         );
-      case 6:
+      case 7:
         return const Stage7Complete();
       default:
         return const SizedBox();
