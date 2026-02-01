@@ -25,6 +25,7 @@ class BusinessSignupPage extends HookWidget {
 
     final emailController = useTextEditingController();
     final passwordController = useTextEditingController();
+    final descriptionController = useTextEditingController();
     final businessNameController = useTextEditingController();
     final addressController = useTextEditingController();
     final yearController = useTextEditingController();
@@ -155,6 +156,7 @@ class BusinessSignupPage extends HookWidget {
                                       businessNameController,
                                   addressController: addressController,
                                   yearController: yearController,
+                                  descriptionController: descriptionController,
                                   selectedType: selectedType,
                                   revenueController: revenueController,
                                   expensesController: expensesController,
@@ -188,6 +190,7 @@ class BusinessSignupPage extends HookWidget {
     required VoidCallback onNext,
     required TextEditingController emailController,
     required TextEditingController passwordController,
+    required TextEditingController descriptionController,
     required TextEditingController businessNameController,
     required TextEditingController addressController,
     required TextEditingController yearController,
@@ -212,10 +215,12 @@ class BusinessSignupPage extends HookWidget {
         return Stage2BusinessInfo(
           onNext: onNext,
           businessNameController: businessNameController,
+          descriptionController: descriptionController, // ✅ add this
           addressController: addressController,
           yearController: yearController,
           selectedType: selectedType,
         );
+
       case 2:
         return Stage3Financials(
           onNext: onNext,

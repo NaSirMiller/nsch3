@@ -9,6 +9,7 @@ class InputField extends StatelessWidget {
     this.keyboardType,
     this.obscureText = false,
     this.suffixIcon,
+    this.maxLines = 1,
   });
 
   final TextEditingController controller;
@@ -17,6 +18,7 @@ class InputField extends StatelessWidget {
   final TextInputType? keyboardType;
   final bool obscureText;
   final Widget? suffixIcon;
+  final int maxLines;
 
   @override
   Widget build(BuildContext context) {
@@ -30,6 +32,7 @@ class InputField extends StatelessWidget {
         controller: controller,
         keyboardType: keyboardType,
         obscureText: obscureText,
+        maxLines: maxLines, // ✅ use maxLines here
         style: const TextStyle(color: Colors.white, fontSize: 15),
         decoration: InputDecoration(
           contentPadding: const EdgeInsets.symmetric(
