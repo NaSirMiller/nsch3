@@ -1,10 +1,12 @@
 import "package:capital_commons/clients/auth_client.dart";
+import "package:capital_commons/clients/exchange_client.dart";
 import "package:capital_commons/core/logger.dart";
 import "package:capital_commons/features/user/user_cubit.dart";
 import "package:capital_commons/firebase_options.dart";
 import "package:capital_commons/repositories/business_repository.dart";
 import "package:capital_commons/repositories/user_info_repository.dart";
 import "package:cloud_firestore/cloud_firestore.dart";
+import "package:cloud_functions/cloud_functions.dart";
 import "package:firebase_auth/firebase_auth.dart";
 import "package:firebase_core/firebase_core.dart";
 import "package:flutter/foundation.dart";
@@ -19,7 +21,7 @@ Future<void> configureDependencies() async {
     try {
       FirebaseFirestore.instance.useFirestoreEmulator("localhost", 8080);
       await FirebaseAuth.instance.useAuthEmulator("localhost", 9099);
-      // FirebaseFunctions.instance.useFunctionsEmulator("localhost", 5001);
+      FirebaseFunctions.instance.useFunctionsEmulator("localhost", 5001);
       // await FirebaseStorage.instance.useStorageEmulator("localhost", 9199);
     } catch (e) {
       Log.fatal(e);
@@ -28,6 +30,7 @@ Future<void> configureDependencies() async {
 
   // Register clients
   getIt.registerLazySingleton(() => AuthClient());
+  getIt.registerLazySingleton(() => ExchangeClient());
 
   // Register repositories
   getIt.registerLazySingleton(() => BusinessRepository());
