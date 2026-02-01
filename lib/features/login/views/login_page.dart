@@ -1,5 +1,8 @@
 import "package:flutter/material.dart";
+import "package:flutter_bloc/flutter_bloc.dart";
 import "package:go_router/go_router.dart";
+import "package:capital_commons/features/login/cubit/login_cubit.dart";
+import "package:capital_commons/features/login/cubit/login_state.dart";
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -12,22 +15,12 @@ class _LoginPageState extends State<LoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
-  bool _isLoading = false;
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
-  }
-
-  void _handleLogin() {
-    setState(() => _isLoading = true);
-
-    // TODO: wire up Firebase Auth here
-    Future.delayed(const Duration(milliseconds: 1500), () {
-      if (mounted) setState(() => _isLoading = false);
-    });
   }
 
   @override
@@ -37,86 +30,121 @@ class _LoginPageState extends State<LoginPage> {
     final isDesktop = screenWidth >= 1024;
     final isTablet = screenWidth >= 768 && screenWidth < 1024;
 
-    return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: const [
-              Color(0xFF0A1628),
-              Color(0xFF1A2E4A),
-              Color(0xFF0D3B66),
-            ],
-          ),
-        ),
-        child: Stack(
-          children: [
-            // background glow circles
-            Positioned(
-              top: -80,
-              right: -60,
-              child: _GlowCircle(
-                size: 250,
-                color: const Color(0xFF4A90D9).withOpacity(0.08),
-              ),
-            ),
-            Positioned(
-              bottom: screenHeight * 0.15,
-              left: -100,
-              child: _GlowCircle(
-                size: 300,
-                color: const Color(0xFF2ECC71).withOpacity(0.06),
-              ),
-            ),
-            Positioned(
-              top: screenHeight * 0.4,
-              right: -40,
-              child: _GlowCircle(
-                size: 180,
-                color: const Color(0xFF4A90D9).withOpacity(0.05),
-              ),
-            ),
+    return BlocProvider(
+      create: (context) => LoginCubit(),
+      child: BlocConsumer<LoginCubit, LoginState>(
+        listener: (context, state) {
+          if (state.status == LoadingStatus.success) {
+            ScaffoldMessenger.of(context).hideCurrentSnackBar(); // hides any previous SnackBar
 
-            // back button
-            Positioned(
-              top: 56,
-              left: 20,
-              child: IconButton(
-                onPressed: () => context.go("/"),
-                icon: const Icon(
-                  Icons.arrow_back_ios_new_rounded,
-                  color: Colors.white70,
-                  size: 22,
+            // TO DO: MODIFY ROUTE BASED ON USER TYPE
+            context.go("/investor/dashboard");
+
+
+          } else if (state.status == LoadingStatus.failure) {
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar() // hides any previous SnackBar
+            ..showSnackBar(
+              SnackBar(
+                content: Text(state.errorMessage ?? "Login failed"),
+                backgroundColor: Colors.redAccent,
+                duration: const Duration(seconds: 3),
+              ),
+            );
+          }
+        },
+        builder: (context, state) {
+          final isLoading = state.status == LoadingStatus.loading;
+
+          return Scaffold(
+            body: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: const [
+                    Color(0xFF0A1628),
+                    Color(0xFF1A2E4A),
+                    Color(0xFF0D3B66),
+                  ],
                 ),
               ),
-            ),
-
-            // main content with card
-            Center(
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                  child: Container(
-                    constraints: BoxConstraints(
-                      maxWidth: isDesktop ? 480 : (isTablet ? 440 : 400),
-                    ),
-                    child: _LoginCard(
-                      emailController: _emailController,
-                      passwordController: _passwordController,
-                      obscurePassword: _obscurePassword,
-                      isLoading: _isLoading,
-                      onObscureToggle: () {
-                        setState(() => _obscurePassword = !_obscurePassword);
-                      },
-                      onLogin: _handleLogin,
+              child: Stack(
+                children: [
+                  // background glow circles
+                  Positioned(
+                    top: -80,
+                    right: -60,
+                    child: _GlowCircle(
+                      size: 250,
+                      color: const Color(0xFF4A90D9).withOpacity(0.08),
                     ),
                   ),
-                ),
+                  Positioned(
+                    bottom: screenHeight * 0.15,
+                    left: -100,
+                    child: _GlowCircle(
+                      size: 300,
+                      color: const Color(0xFF2ECC71).withOpacity(0.06),
+                    ),
+                  ),
+                  Positioned(
+                    top: screenHeight * 0.4,
+                    right: -40,
+                    child: _GlowCircle(
+                      size: 180,
+                      color: const Color(0xFF4A90D9).withOpacity(0.05),
+                    ),
+                  ),
+
+                  // back button
+                  Positioned(
+                    top: 56,
+                    left: 20,
+                    child: IconButton(
+                      onPressed: () => context.go("/"),
+                      icon: const Icon(
+                        Icons.arrow_back_ios_new_rounded,
+                        color: Colors.white70,
+                        size: 22,
+                      ),
+                    ),
+                  ),
+
+                  // main content with card
+                  Center(
+                    child: SingleChildScrollView(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                        child: Container(
+                          constraints: BoxConstraints(
+                            maxWidth: isDesktop ? 480 : (isTablet ? 440 : 400),
+                          ),
+                          child: _LoginCard(
+                            emailController: _emailController,
+                            passwordController: _passwordController,
+                            obscurePassword: _obscurePassword,
+                            isLoading: isLoading,
+                            onObscureToggle: () {
+                              setState(() =>
+                                  _obscurePassword = !_obscurePassword);
+                            },
+                            onLogin: () {
+                              context.read<LoginCubit>().login(
+                                    email: _emailController.text,
+                                    password: _passwordController.text,
+                                  );
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
@@ -143,8 +171,6 @@ class _LoginCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-
     return Container(
       padding: const EdgeInsets.all(40),
       decoration: BoxDecoration(
@@ -221,7 +247,6 @@ class _LoginCard extends StatelessWidget {
             controller: emailController,
             label: "Email",
             icon: Icons.email_outlined,
-            keyboardType: TextInputType.emailAddress,
           ),
 
           const SizedBox(height: 16),
@@ -279,9 +304,8 @@ class _LoginCard extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF4A90D9),
                 foregroundColor: Colors.white,
-                disabledBackgroundColor: const Color(
-                  0xFF4A90D9,
-                ).withOpacity(0.5),
+                disabledBackgroundColor:
+                    const Color(0xFF4A90D9).withOpacity(0.5),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -310,7 +334,7 @@ class _LoginCard extends StatelessWidget {
 
           const SizedBox(height: 24),
 
-          // divider with OR
+          // OR divider
           Row(
             children: [
               Expanded(
@@ -319,13 +343,13 @@ class _LoginCard extends StatelessWidget {
                   color: Colors.white.withOpacity(0.15),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16),
                 child: Text(
                   "OR",
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.white.withOpacity(0.4),
+                    color: Colors.white54,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -378,7 +402,6 @@ class _InputField extends StatelessWidget {
   final TextEditingController controller;
   final String label;
   final IconData icon;
-  final TextInputType? keyboardType;
   final bool obscureText;
   final Widget? suffixIcon;
 
@@ -386,7 +409,6 @@ class _InputField extends StatelessWidget {
     required this.controller,
     required this.label,
     required this.icon,
-    this.keyboardType,
     this.obscureText = false,
     this.suffixIcon,
   });
