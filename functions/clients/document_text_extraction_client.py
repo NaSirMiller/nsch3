@@ -271,7 +271,7 @@ class DocumentTextExtractionClient:
 
 router_client: OpenRouterClient = OpenRouterClient(
     model_name="deepseek/deepseek-chat-v3.1",
-    api_key="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",
+    api_key="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",
 )
 doc_client: DocumentTextExtractionClient = DocumentTextExtractionClient(
     open_router_client=router_client
