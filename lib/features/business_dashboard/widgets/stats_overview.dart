@@ -1,5 +1,5 @@
 import "package:flutter/material.dart";
-import "shared/metric_card.dart";
+import "package:capital_commons/shared/metric_card.dart";
 
 class StatsOverview extends StatelessWidget {
   const StatsOverview({super.key});

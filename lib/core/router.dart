@@ -33,5 +33,9 @@ final goRouter = GoRouter(
       path: "/business/dashboard",
       builder: (_, _) => const BusinessDashboardPage(),
     ),
+    GoRoute(
+      path: "/investor/dashboard",
+      builder: (_, _) => const InvestorDashboardPage(),
+    ),
   ],
 );

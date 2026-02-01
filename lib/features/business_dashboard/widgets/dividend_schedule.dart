@@ -1,5 +1,5 @@
 import "package:flutter/material.dart";
-import "shared/dashboard_section.dart";
+import "package:capital_commons/shared/dashboard_section.dart";
 
 class DividendSchedule extends StatelessWidget {
   const DividendSchedule({super.key});
