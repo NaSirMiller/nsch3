@@ -1,20 +1,19 @@
 import "package:flutter/material.dart";
 import "package:flutter_hooks/flutter_hooks.dart";
+import "package:flutter_bloc/flutter_bloc.dart";
+import "package:capital_commons/features/business_signup/cubit/business_signup_cubit.dart";
 import "shared/stage_title.dart";
 import "shared/action_button.dart";
 
 class Stage6Legal extends HookWidget {
-  const Stage6Legal({
-    super.key,
-    required this.onNext,
-    required this.agreedToTerms,
-  });
+  const Stage6Legal({super.key, required this.onNext});
 
   final VoidCallback onNext;
-  final ValueNotifier<bool> agreedToTerms;
 
   @override
   Widget build(BuildContext context) {
+    final agreedToTerms = useState(false);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -23,6 +22,7 @@ class Stage6Legal extends HookWidget {
           subtitle: "Review and accept platform terms",
         ),
         const SizedBox(height: 32),
+
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
@@ -56,6 +56,7 @@ class Stage6Legal extends HookWidget {
           ),
         ),
         const SizedBox(height: 24),
+
         Row(
           children: [
             Checkbox(
@@ -76,9 +77,18 @@ class Stage6Legal extends HookWidget {
           ],
         ),
         const SizedBox(height: 32),
+
         ActionButton(
           label: "Complete Setup",
-          onPressed: agreedToTerms.value ? onNext : null,
+          onPressed: agreedToTerms.value
+              ? () async {
+                  context.read<BusinessSignupCubit>().acceptTerms();
+                  await context
+                      .read<BusinessSignupCubit>()
+                      .submitBusinessSignup();
+                  onNext();
+                }
+              : null,
         ),
       ],
     );

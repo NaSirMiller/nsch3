@@ -20,24 +20,7 @@ class BusinessSignupPage extends HookWidget {
   Widget build(BuildContext context) {
     final currentStage = useState(0);
     final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
     final isDesktop = screenWidth >= 1024;
-
-    final emailController = useTextEditingController();
-    final passwordController = useTextEditingController();
-    final descriptionController = useTextEditingController();
-    final businessNameController = useTextEditingController();
-    final addressController = useTextEditingController();
-    final yearController = useTextEditingController();
-    final selectedType = useState<String?>(null);
-    final revenueController = useTextEditingController();
-    final expensesController = useTextEditingController();
-    final netProfitController = useTextEditingController();
-    final selectedPeriod = useState<String?>(null);
-    final totalSharesController = useTextEditingController(text: "1000");
-    final pricePerShareController = useTextEditingController(text: "100");
-    final dividendController = useTextEditingController(text: "5");
-    final agreedToTerms = useState(false);
 
     final stages = [
       "Account",
@@ -123,7 +106,6 @@ class BusinessSignupPage extends HookWidget {
                             currentStage: currentStage.value,
                             stages: stages,
                           ),
-
                           const SizedBox(height: 40),
 
                           // Stage content card
@@ -144,31 +126,10 @@ class BusinessSignupPage extends HookWidget {
                                 ),
                               ],
                             ),
-                            child: Builder(
-                              builder: (context) {
-                                return _buildStageContent(
-                                  context: context,
-                                  stage: currentStage.value,
-                                  onNext: nextStage,
-                                  emailController: emailController,
-                                  passwordController: passwordController,
-                                  businessNameController:
-                                      businessNameController,
-                                  addressController: addressController,
-                                  yearController: yearController,
-                                  descriptionController: descriptionController,
-                                  selectedType: selectedType,
-                                  revenueController: revenueController,
-                                  expensesController: expensesController,
-                                  netProfitController: netProfitController,
-                                  selectedPeriod: selectedPeriod,
-                                  totalSharesController: totalSharesController,
-                                  pricePerShareController:
-                                      pricePerShareController,
-                                  dividendController: dividendController,
-                                  agreedToTerms: agreedToTerms,
-                                );
-                              },
+                            child: _buildStageContent(
+                              context: context,
+                              stage: currentStage.value,
+                              onNext: nextStage,
                             ),
                           ),
                         ],
@@ -188,79 +149,20 @@ class BusinessSignupPage extends HookWidget {
     required BuildContext context,
     required int stage,
     required VoidCallback onNext,
-    required TextEditingController emailController,
-    required TextEditingController passwordController,
-    required TextEditingController descriptionController,
-    required TextEditingController businessNameController,
-    required TextEditingController addressController,
-    required TextEditingController yearController,
-    required ValueNotifier<String?> selectedType,
-    required TextEditingController revenueController,
-    required TextEditingController expensesController,
-    required TextEditingController netProfitController,
-    required ValueNotifier<String?> selectedPeriod,
-    required TextEditingController totalSharesController,
-    required TextEditingController pricePerShareController,
-    required TextEditingController dividendController,
-    required ValueNotifier<bool> agreedToTerms,
   }) {
     switch (stage) {
       case 0:
-        return Stage1Account(
-          onNext: onNext,
-          emailController: emailController,
-          passwordController: passwordController,
-        );
+        return Stage1Account(onNext: onNext);
       case 1:
-        return Stage2BusinessInfo(
-          onNext: onNext,
-          businessNameController: businessNameController,
-          descriptionController: descriptionController, // ✅ add this
-          addressController: addressController,
-          yearController: yearController,
-          selectedType: selectedType,
-        );
-
+        return Stage2BusinessInfo(onNext: onNext);
       case 2:
-        return Stage3Financials(
-          onNext: onNext,
-          revenueController: revenueController,
-          expensesController: expensesController,
-          netProfitController: netProfitController,
-          selectedPeriod: selectedPeriod,
-        );
+        return Stage3Financials(onNext: onNext);
       case 3:
         return Stage4Valuation(onNext: onNext);
       case 4:
-        return Stage5Shares(
-          onNext: onNext,
-          totalSharesController: totalSharesController,
-          pricePerShareController: pricePerShareController,
-          dividendController: dividendController,
-        );
+        return Stage5Shares(onNext: onNext);
       case 5:
-        return Stage6Legal(
-          onNext: () {
-            onNext();
-            context.read<BusinessSignupCubit>().submitForm(
-              email: emailController.text,
-              password: passwordController.text,
-              businessName: businessNameController.text,
-              address: addressController.text,
-              year: yearController.text,
-              selectedType: selectedType.value,
-              revenue: revenueController.text,
-              expenses: expensesController.text,
-              netProfit: netProfitController.text,
-              selectedPeriod: selectedPeriod.value,
-              totalShares: totalSharesController.text,
-              pricePerShare: pricePerShareController.text,
-              dividend: dividendController.text,
-              agreedToTerms: agreedToTerms.value,
-            );
-          },
-          agreedToTerms: agreedToTerms,
-        );
+        return Stage6Legal(onNext: onNext);
       case 6:
         return const Stage7Complete();
       default:
